@@ -12,8 +12,17 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
+
+        // Blur
+        //renderscriptTargetApi 19
+       // renderscriptSupportModeEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
     buildTypes {
@@ -28,6 +37,8 @@ android {
     }
 }
 
+apply plugin: 'com.google.gms.google-services'
+
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -38,7 +49,22 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.2.2'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    // Firebase BOM
+    implementation platform('com.google.firebase:firebase-bom:28.0.1')
+    // Google firebase analytics
+    implementation 'com.google.firebase:firebase-analytics'
+    // Firebase Authentification Library
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
+    // Google Play services library
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+    // Auth facebook
+    // implementation 'com.facebook.android:facebook-android-sdk:4.x'
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    // Auth twitter
+    //implementation 'com.twitter.sdk.android:twitter-core:3.x'
 }
