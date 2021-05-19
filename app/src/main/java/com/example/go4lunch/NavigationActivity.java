@@ -8,14 +8,19 @@ import androidx.navigation.ui.NavigationUI;
 
 import android.os.Bundle;
 
+import com.example.go4lunch.ui.BaseActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends BaseActivity {
 
+    @Override
+    public int getFragmentLayout(){
+        return R.layout.activity_navigation;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_navigation);
+
         configureNavigation();
     }
 
