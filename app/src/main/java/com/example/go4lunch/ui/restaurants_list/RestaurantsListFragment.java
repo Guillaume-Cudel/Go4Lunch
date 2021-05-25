@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.go4lunch.R;
+import com.google.android.libraries.places.api.Places;
 
 public class RestaurantsListFragment extends Fragment {
 
@@ -22,5 +23,8 @@ public class RestaurantsListFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_restaurants_list, container, false);
         return view;
+
+        // Initialize Google places SDK
+        Places.initialize(getActivity().getApplicationContext(), apiKey);
     }
 }

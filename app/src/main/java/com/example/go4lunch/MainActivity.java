@@ -56,20 +56,26 @@ public class MainActivity extends BaseActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        configureGoogleAuth();
+
         mAuth = FirebaseAuth.getInstance();
-
-
-        binding.googleSignInButton.setSize(SignInButton.SIZE_STANDARD);
-        onClickGoogleButton();
-        onClickFacebookButton();
-        onClickSignOutButton();
 
 
     }
 
 
     // ACTION
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        configureGoogleAuth();
+
+        binding.googleSignInButton.setSize(SignInButton.SIZE_STANDARD);
+        onClickGoogleButton();
+        onClickFacebookButton();
+        onClickSignOutButton();
+    }
 
     private void onClickGoogleButton() {
         binding.googleSignInButton.setOnClickListener(new View.OnClickListener() {
@@ -114,7 +120,6 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // todo Start NavigationActivity if user is signed in
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         updateUI(currentUser);
@@ -139,7 +144,6 @@ public class MainActivity extends BaseActivity {
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
-                        // todo Recove user's data
                         handleFacebookAccessToken(loginResult.getAccessToken());
                     }
 
@@ -241,15 +245,4 @@ public class MainActivity extends BaseActivity {
     // REST REQUEST
     // --------------------
 
-    private void createUserInFirestore() {
-
-        if (this.getCurrentUser() != null) {
-
-            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-            String username = this.getCurrentUser().getDisplayName();
-            String uid = this.getCurrentUser().getUid();
-
-            // UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-        }
-    }
 }

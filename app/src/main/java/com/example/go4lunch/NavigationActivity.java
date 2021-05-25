@@ -1,37 +1,36 @@
 package com.example.go4lunch;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import android.os.Build;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.appcompat.widget.Toolbar;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.ui.BaseActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class NavigationActivity extends BaseActivity implements  NavigationView.OnNavigationItemSelectedListener{
 
     private ActivityNavigationBinding binding;
 
     BottomNavigationView mBottomNavigationView;
-    Toolbar toolbar;
-
-    //AppBarConfiguration mAppBarConfiguration;
-
 
     @Override
     public int getFragmentLayout() {
@@ -46,6 +45,8 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         setContentView(view);
 
 
+        mBottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation_bottom_nav_view);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, binding.drawerLayout,
@@ -54,48 +55,15 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         toggle.syncState();
 
 
-        mBottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation_bottom_nav_view);
-
-        configureBottomNavigation();
+        configureNavigation();
+        updateUIWhenCreating();
+        onClickItemsDrawer();
 
     }
-
-    @Override
-    public void onBackPressed() {
-        //  Handle back click to close menu
-        if (this.binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            this.binding.drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-
-        //  Handle Navigation Item Click
-        int id = item.getItemId();
-
-        switch (id){
-            case R.id.nav_your_lunch :
-                break;
-            case R.id.nav_settings:
-                break;
-            case R.id.nav_log_out:
-                break;
-            default:
-                break;
-        }
-
-        this.binding.drawerLayout.closeDrawer(GravityCompat.START);
-
-        return true;
-    }
-
 
     // CONFIGURATION
 
-    private void configureBottomNavigation(){
+    private void configureNavigation(){
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -109,5 +77,88 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         NavigationUI.setupWithNavController(mBottomNavigationView, navController);
         NavigationUI.setupWithNavController(binding.navigationDrawerNavView, navController);
     }
+
+    // UI
+
+    private void updateUIWhenCreating(){
+       // NavigationView navigationView = (NavigationView) findViewById(R.id.your_nav_view_id);
+        View header = binding.navigationDrawerNavView.getHeaderView(0);
+        ImageView profilImage = (ImageView)  header.findViewById(R.id.profilImage);
+        TextView profilUsername = (TextView) header.findViewById(R.id.profil_name);
+        TextView profilUsermail = (TextView) header.findViewById(R.id.profil_mail);
+
+        FirebaseUser currentUser = this.getCurrentUser();
+        if (currentUser != null){
+
+            //Get picture URL from Firebase
+            Uri photoUrl = currentUser.getPhotoUrl();
+            if (photoUrl != null) {
+                Glide.with(this)
+                        .load(photoUrl)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(profilImage);
+            }
+
+            //Get email & username from Firebase
+            String email = TextUtils.isEmpty(currentUser.getEmail()) ? getString(R.string.info_no_email_found) : currentUser.getEmail();
+            String username = TextUtils.isEmpty(currentUser.getDisplayName()) ? getString(R.string.info_no_username_found) : currentUser.getDisplayName();
+
+            //Update views with data
+            profilUsername.setText(username);
+            profilUsermail.setText(email);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //  Handle back click to close menu
+        if (this.binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            this.binding.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    // ACTION
+
+    private void onClickItemsDrawer(){
+        NavigationView navView = binding.navigationDrawerNavView;
+        if( navView != null){
+            setupDrawerContent(navView);
+        }
+    }
+
+    private void setupDrawerContent(NavigationView navigationView)
+    {
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+
+        //  Handle Navigation Item Click
+        int id = item.getItemId();
+        item.setChecked(true);
+        binding.drawerLayout.closeDrawers();
+
+        switch (id){
+            case R.id.nav_your_lunch :
+                break;
+            case R.id.nav_settings:
+                break;
+            case R.id.nav_log_out:
+                //AuthUI.getInstance().signOut(this);
+                FirebaseAuth.getInstance().signOut();
+                finish();
+                break;
+            default:
+                break;
+        }
+
+        this.binding.drawerLayout.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
 
 }

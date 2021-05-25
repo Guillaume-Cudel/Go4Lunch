@@ -26,11 +26,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     // UI
     // --------------------
 
-    // Use this to the ProfilActivity
-    /*protected void configureToolbar(){
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-    }*/
 
     // UTILS
     @Nullable
