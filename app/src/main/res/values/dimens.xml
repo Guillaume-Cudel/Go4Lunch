@@ -8,4 +8,6 @@
     <dimen name="padding">12dp</dimen>
     <dimen name="main_horizontal_fb_button">45dp</dimen>
     <dimen name="margin_start">20dp</dimen>
+    <dimen name="ten">10dp</dimen>
+    <dimen name="five">5dp</dimen>
 </resources>
