@@ -17,14 +17,18 @@ import com.google.android.libraries.places.api.Places;
 
 public class RestaurantsListFragment extends Fragment {
 
+    private TextView textView;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_restaurants_list, container, false);
+
+        textView = (TextView) view.findViewById(R.id.restaurant_text);
+
         return view;
 
         // Initialize Google places SDK
-        Places.initialize(getActivity().getApplicationContext(), apiKey);
+       // Places.initialize(getActivity().getApplicationContext(), apiKey);
     }
 }
