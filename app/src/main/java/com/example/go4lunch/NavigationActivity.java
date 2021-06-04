@@ -2,6 +2,7 @@ package com.example.go4lunch;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -21,6 +22,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.ui.BaseActivity;
+import com.example.go4lunch.ui.map.MapFragment;
+import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,8 +32,19 @@ import com.google.firebase.auth.FirebaseUser;
 public class NavigationActivity extends BaseActivity implements  NavigationView.OnNavigationItemSelectedListener{
 
     private ActivityNavigationBinding binding;
-
     BottomNavigationView mBottomNavigationView;
+
+    //-----------------
+
+    private Fragment fragmentMap;
+    private Fragment fragmentRestaurantsList;
+    private Fragment fragmentWorkmates;
+
+    private static final int FRAGMENT_MAP = 0;
+    private static final int FRAGMENT_RESTAURANT =1;
+    private static final int FRAGMENT_WORKMATES = 2;
+
+    //------------
 
     @Override
     public int getFragmentLayout() {
@@ -125,12 +139,17 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         NavigationView navView = binding.navigationDrawerNavView;
         if( navView != null){
             setupDrawerContent(navView);
+            setUpBottomContent(mBottomNavigationView);
         }
     }
 
     private void setupDrawerContent(NavigationView navigationView)
     {
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void setUpBottomContent( BottomNavigationView bottomContent){
+        bottomContent.setOnNavigationItemSelectedListener(this::onNavigationItemSelected);
     }
 
     @Override
@@ -151,6 +170,19 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
                 FirebaseAuth.getInstance().signOut();
                 finish();
                 break;
+
+            case R.id.navigation_map:
+                this.showFragment(FRAGMENT_MAP);
+                break;
+
+            case R.id.navigation_restaurants_list:
+                this.showFragment(FRAGMENT_RESTAURANT);
+                break;
+
+            case R.id.navigation_workmates:
+                this.showFragment(FRAGMENT_WORKMATES);
+                break;
+
             default:
                 break;
         }
@@ -158,6 +190,56 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         this.binding.drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    // -------------
+
+    private void showFragment(int fragmentID){
+        switch (fragmentID){
+            case FRAGMENT_MAP:
+                this.showMapFragment();
+                break;
+
+            case FRAGMENT_RESTAURANT:
+                this.showRestaurantsListFragment();
+                break;
+
+            case FRAGMENT_WORKMATES:
+                this.showWorkmatesFragment();
+                break;
+
+            default:
+                break;
+
+        }
+    }
+
+    private void showMapFragment(){
+        if (this.fragmentMap == null){
+            this.fragmentMap = MapFragment.newInstance();
+            this.startTransactionFragment(this.fragmentMap);
+        }
+    }
+
+    private void showRestaurantsListFragment(){
+        if (this.fragmentRestaurantsList == null) {
+            this.fragmentRestaurantsList = RestaurantsListFragment.newInstance();
+            this.startTransactionFragment(this.fragmentRestaurantsList);
+        }
+    }
+
+    private void showWorkmatesFragment(){
+        if (this.fragmentWorkmates == null){
+            this.fragmentWorkmates = MapFragment.newInstance();
+            this.startTransactionFragment(this.fragmentWorkmates);
+        }
+    }
+
+    private void startTransactionFragment(Fragment fragment){
+        if (!fragment.isVisible()){
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment).commit();
+        }
     }
 
 

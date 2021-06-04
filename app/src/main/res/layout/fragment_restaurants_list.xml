@@ -7,4 +7,17 @@
     tools:context=".ui.restaurants_list.RestaurantsListFragment">
 
 
+    <TextView
+        android:id="@+id/restau_location_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Location here !"
+        android:textColor="@color/black"
+        android:textSize="30sp"/>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
