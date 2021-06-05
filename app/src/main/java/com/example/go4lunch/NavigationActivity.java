@@ -1,9 +1,12 @@
 package com.example.go4lunch;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -15,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -58,9 +62,16 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         View view = binding.getRoot();
         setContentView(view);
 
-
         mBottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation_bottom_nav_view);
 
+
+        // Show the first fragment when starting activity
+        fragmentMap = new MapFragment();
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.nav_host_fragment, fragmentMap);
+        fragmentTransaction.commit();
+
+        // Toolbar configuration
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, binding.drawerLayout,
@@ -72,6 +83,7 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         configureNavigation();
         updateUIWhenCreating();
         onClickItemsDrawer();
+       // fragmentsCalledAgain();
 
     }
 
@@ -90,12 +102,12 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(mBottomNavigationView, navController);
         NavigationUI.setupWithNavController(binding.navigationDrawerNavView, navController);
+
     }
 
     // UI
 
     private void updateUIWhenCreating(){
-       // NavigationView navigationView = (NavigationView) findViewById(R.id.your_nav_view_id);
         View header = binding.navigationDrawerNavView.getHeaderView(0);
         ImageView profilImage = (ImageView)  header.findViewById(R.id.profilImage);
         TextView profilUsername = (TextView) header.findViewById(R.id.profil_name);
@@ -139,8 +151,8 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         NavigationView navView = binding.navigationDrawerNavView;
         if( navView != null){
             setupDrawerContent(navView);
-            setUpBottomContent(mBottomNavigationView);
         }
+        setUpBottomContent(mBottomNavigationView);
     }
 
     private void setupDrawerContent(NavigationView navigationView)
@@ -172,15 +184,15 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
                 break;
 
             case R.id.navigation_map:
-                this.showFragment(FRAGMENT_MAP);
+                showFragment(FRAGMENT_MAP);
                 break;
 
             case R.id.navigation_restaurants_list:
-                this.showFragment(FRAGMENT_RESTAURANT);
+                showFragment(FRAGMENT_RESTAURANT);
                 break;
 
             case R.id.navigation_workmates:
-                this.showFragment(FRAGMENT_WORKMATES);
+                showFragment(FRAGMENT_WORKMATES);
                 break;
 
             default:
@@ -215,23 +227,23 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
     }
 
     private void showMapFragment(){
-        if (this.fragmentMap == null){
-            this.fragmentMap = MapFragment.newInstance();
-            this.startTransactionFragment(this.fragmentMap);
+        if (fragmentMap == null){
+            fragmentMap = MapFragment.newInstance();
+            startTransactionFragment(fragmentMap);
         }
     }
 
     private void showRestaurantsListFragment(){
-        if (this.fragmentRestaurantsList == null) {
-            this.fragmentRestaurantsList = RestaurantsListFragment.newInstance();
-            this.startTransactionFragment(this.fragmentRestaurantsList);
+        if (fragmentRestaurantsList == null) {
+            fragmentRestaurantsList = RestaurantsListFragment.newInstance();
+            startTransactionFragment(fragmentRestaurantsList);
         }
     }
 
     private void showWorkmatesFragment(){
-        if (this.fragmentWorkmates == null){
-            this.fragmentWorkmates = MapFragment.newInstance();
-            this.startTransactionFragment(this.fragmentWorkmates);
+        if (fragmentWorkmates == null){
+            fragmentWorkmates = MapFragment.newInstance();
+            startTransactionFragment(fragmentWorkmates);
         }
     }
 
@@ -241,6 +253,34 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
                     .replace(R.id.nav_host_fragment, fragment).commit();
         }
     }
+
+    /*private void fragmentsCalledAgain(){
+        mBottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                item.setChecked(true);
+
+                switch (id){
+                    case R.id.navigation_map:
+                        showFragment(FRAGMENT_MAP);
+
+                        break;
+
+                    case R.id.navigation_restaurants_list:
+                        showFragment(FRAGMENT_RESTAURANT);
+                        break;
+
+                    case R.id.navigation_workmates:
+                        showFragment(FRAGMENT_WORKMATES);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+    }*/
 
 
 }
