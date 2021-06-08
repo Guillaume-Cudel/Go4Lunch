@@ -2,15 +2,16 @@ package com.example.go4lunch;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
+
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,30 +26,47 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
+import com.example.go4lunch.model.MyLocation;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
+import com.example.go4lunch.ui.workmates.WorkmatesFragment;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class NavigationActivity extends BaseActivity implements  NavigationView.OnNavigationItemSelectedListener{
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
+public class NavigationActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ActivityNavigationBinding binding;
     BottomNavigationView mBottomNavigationView;
 
-    //-----------------
-
-    private Fragment fragmentMap;
-    private Fragment fragmentRestaurantsList;
-    private Fragment fragmentWorkmates;
+    public Fragment fragmentMap;
+    public Fragment fragmentRestaurantsList;
+    public Fragment fragmentWorkmates;
 
     private static final int FRAGMENT_MAP = 0;
-    private static final int FRAGMENT_RESTAURANT =1;
+    private static final int FRAGMENT_RESTAURANT = 1;
     private static final int FRAGMENT_WORKMATES = 2;
 
-    //------------
+    // Location
+    public FusedLocationProviderClient fusedLocation;
+    public String longitudeText;
+    public String latitudeText;
+
+    // Easy location
+    private static final int REQUEST_LOCATION_PERMISSION = 10;
+
+    //-----------------
 
     @Override
     public int getFragmentLayout() {
@@ -80,41 +98,22 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         toggle.syncState();
 
 
-        configureNavigation();
         updateUIWhenCreating();
         onClickItemsDrawer();
-       // fragmentsCalledAgain();
-
-    }
-
-    // CONFIGURATION
-
-    private void configureNavigation(){
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_map, R.id.navigation_restaurants_list, R.id.navigation_workmates)
-                .build();
-
-        final NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-        final NavController navController = navHostFragment.getNavController();
-
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(mBottomNavigationView, navController);
-        NavigationUI.setupWithNavController(binding.navigationDrawerNavView, navController);
+        createRequestLocation();
 
     }
 
     // UI
 
-    private void updateUIWhenCreating(){
+    private void updateUIWhenCreating() {
         View header = binding.navigationDrawerNavView.getHeaderView(0);
-        ImageView profilImage = (ImageView)  header.findViewById(R.id.profilImage);
+        ImageView profilImage = (ImageView) header.findViewById(R.id.profilImage);
         TextView profilUsername = (TextView) header.findViewById(R.id.profil_name);
         TextView profilUsermail = (TextView) header.findViewById(R.id.profil_mail);
 
         FirebaseUser currentUser = this.getCurrentUser();
-        if (currentUser != null){
+        if (currentUser != null) {
 
             //Get picture URL from Firebase
             Uri photoUrl = currentUser.getPhotoUrl();
@@ -147,20 +146,19 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
 
     // ACTION
 
-    private void onClickItemsDrawer(){
+    private void onClickItemsDrawer() {
         NavigationView navView = binding.navigationDrawerNavView;
-        if( navView != null){
+        if (navView != null) {
             setupDrawerContent(navView);
         }
         setUpBottomContent(mBottomNavigationView);
     }
 
-    private void setupDrawerContent(NavigationView navigationView)
-    {
+    private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    private void setUpBottomContent( BottomNavigationView bottomContent){
+    private void setUpBottomContent(BottomNavigationView bottomContent) {
         bottomContent.setOnNavigationItemSelectedListener(this::onNavigationItemSelected);
     }
 
@@ -172,8 +170,8 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         item.setChecked(true);
         binding.drawerLayout.closeDrawers();
 
-        switch (id){
-            case R.id.nav_your_lunch :
+        switch (id) {
+            case R.id.nav_your_lunch:
                 break;
             case R.id.nav_settings:
                 break;
@@ -204,10 +202,10 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         return true;
     }
 
-    // -------------
+    // VIEW
 
-    private void showFragment(int fragmentID){
-        switch (fragmentID){
+    private void showFragment(int fragmentID) {
+        switch (fragmentID) {
             case FRAGMENT_MAP:
                 this.showMapFragment();
                 break;
@@ -226,61 +224,138 @@ public class NavigationActivity extends BaseActivity implements  NavigationView.
         }
     }
 
-    private void showMapFragment(){
-        if (fragmentMap == null){
+    private void showMapFragment() {
+        if (fragmentMap == null) {
             fragmentMap = MapFragment.newInstance();
             startTransactionFragment(fragmentMap);
+            return;
         }
+        startTransactionFragment(fragmentMap);
     }
 
-    private void showRestaurantsListFragment(){
+    private void showRestaurantsListFragment() {
         if (fragmentRestaurantsList == null) {
             fragmentRestaurantsList = RestaurantsListFragment.newInstance();
             startTransactionFragment(fragmentRestaurantsList);
+            return;
         }
+        startTransactionFragment(fragmentRestaurantsList);
     }
 
-    private void showWorkmatesFragment(){
-        if (fragmentWorkmates == null){
-            fragmentWorkmates = MapFragment.newInstance();
+    private void showWorkmatesFragment() {
+        if (fragmentWorkmates == null) {
+            fragmentWorkmates = WorkmatesFragment.newInstance();
             startTransactionFragment(fragmentWorkmates);
+            return;
         }
+        startTransactionFragment(fragmentWorkmates);
     }
 
-    private void startTransactionFragment(Fragment fragment){
-        if (!fragment.isVisible()){
+    private void startTransactionFragment(Fragment fragment) {
+        if (!fragment.isVisible()) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.nav_host_fragment, fragment).commit();
         }
     }
 
-    /*private void fragmentsCalledAgain(){
-        mBottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        requestLocationPermission();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        createRequestLocation();
+    }
+
+    // Location
+
+    // Configure EASY location request
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    public void requestLocationPermission() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
+        } else {
+            EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
+        }
+    }
+
+    public void createRequestLocation() {
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(60000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        LocationCallback locationCallback = new LocationCallback() {
             @Override
-            public void onNavigationItemReselected(@NonNull MenuItem item) {
-                int id = item.getItemId();
-                item.setChecked(true);
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                //super.onLocationResult(locationResult);
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
 
-                switch (id){
-                    case R.id.navigation_map:
-                        showFragment(FRAGMENT_MAP);
+                       double longitude = location.getLongitude();
+                       double latitude = location.getLatitude();
+                       longitudeText = Double.toString(longitude);
+                       latitudeText = Double.toString(latitude);
 
-                        break;
-
-                    case R.id.navigation_restaurants_list:
-                        showFragment(FRAGMENT_RESTAURANT);
-                        break;
-
-                    case R.id.navigation_workmates:
-                        showFragment(FRAGMENT_WORKMATES);
-                        break;
-
-                    default:
-                        break;
+                    }
                 }
             }
-        });
+        };
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+
+    /*public void updateLastLocation(){
+        // get last location
+        fusedLocation = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            fusedLocation.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+
+                            if (location != null) {
+                                longitude = location.getLongitude();
+                                latitude = location.getLatitude();
+                                longitudeText = Double.toString(longitude);
+                                latitudeText = Double.toString(latitude);
+                            }
+                        }
+                    });
+        }
     }*/
+
+    public String getLongitudeText() {
+        return longitudeText;
+    }
+
+    public String getLatitudeText() {
+        return latitudeText;
+    }
+
 
 
 }

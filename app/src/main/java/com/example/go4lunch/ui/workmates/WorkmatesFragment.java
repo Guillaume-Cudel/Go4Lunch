@@ -15,6 +15,8 @@ public class WorkmatesFragment extends Fragment {
 
     private TextView textView;
 
+    public WorkmatesFragment(){}
+
 
     public static WorkmatesFragment newInstance() {
         return (new WorkmatesFragment());
