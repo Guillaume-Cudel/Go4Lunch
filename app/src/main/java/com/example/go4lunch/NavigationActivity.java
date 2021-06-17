@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -26,7 +25,6 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
-import com.example.go4lunch.model.MyLocation;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
@@ -36,7 +34,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,8 +57,10 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     // Location
     public FusedLocationProviderClient fusedLocation;
-    public String longitudeText;
-    public String latitudeText;
+    public double longitude;
+    public double latitude;
+   // public String longitudeText;
+   // public String latitudeText;
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
@@ -176,7 +175,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             case R.id.nav_settings:
                 break;
             case R.id.nav_log_out:
-                //AuthUI.getInstance().signOut(this);
                 FirebaseAuth.getInstance().signOut();
                 finish();
                 break;
@@ -308,11 +306,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
 
-                       double longitude = location.getLongitude();
-                       double latitude = location.getLatitude();
-                       longitudeText = Double.toString(longitude);
-                       latitudeText = Double.toString(latitude);
-
+                        longitude = location.getLongitude();
+                        latitude = location.getLatitude();
                     }
                 }
             }
@@ -325,35 +320,13 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     }
 
 
-    /*public void updateLastLocation(){
-        // get last location
-        fusedLocation = LocationServices.getFusedLocationProviderClient(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
-            fusedLocation.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-
-                            if (location != null) {
-                                longitude = location.getLongitude();
-                                latitude = location.getLatitude();
-                                longitudeText = Double.toString(longitude);
-                                latitudeText = Double.toString(latitude);
-                            }
-                        }
-                    });
-        }
-    }*/
-
-    public String getLongitudeText() {
-        return longitudeText;
+    public double getDoubleLongitude() {
+        return longitude;
     }
 
-    public String getLatitudeText() {
-        return latitudeText;
+    public double getDoubleLatitude() {
+        return latitude;
     }
 
 

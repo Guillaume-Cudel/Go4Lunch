@@ -26,6 +26,9 @@ android {
     }
 
     buildTypes {
+        /*debug{
+            resValue"string", "google_api_client_key", '"AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704"'
+        }*/
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -66,14 +69,19 @@ dependencies {
     // Google Play services library
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
     // Auth facebook
-    // implementation 'com.facebook.android:facebook-android-sdk:4.x'
     implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
     // Auth twitter
     //implementation 'com.twitter.sdk.android:twitter-core:3.x'
-    // Google play services MyLocation
+    // Google play services Restaurant
     implementation "com.google.android.gms:play-services-location:18.0.0"
     // Easy permission
     implementation 'pub.devrel:easypermissions:3.0.0'
     // SDK Google places
     implementation 'com.google.android.libraries.places:places:2.2.0'
+    // retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    // picasso
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
 }

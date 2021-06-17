@@ -7,6 +7,8 @@
     tools:context=".ui.map.MapFragment">
 
 
+
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/map_image_test"
         android:layout_width="300dp"

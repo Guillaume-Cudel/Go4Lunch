@@ -9,11 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 
 public class WorkmatesFragment extends Fragment {
-
-    private TextView textView;
 
     public WorkmatesFragment(){}
 
@@ -26,7 +25,17 @@ public class WorkmatesFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
 
-        textView = (TextView) view.findViewById(R.id.workmates_text);
+        TextView textView = (TextView) view.findViewById(R.id.workmates_text);
+        TextView showLocation = (TextView) view.findViewById(R.id.show_location);
+
+         NavigationActivity navigationActivity = (NavigationActivity) getActivity();
+         double mLongitude = navigationActivity.getDoubleLongitude();
+         double mLatitude = navigationActivity.getDoubleLatitude();
+
+        String latitudeText = Double.toString(mLatitude);
+        String longitudeText = Double.toString(mLongitude);
+        String locationText = latitudeText + ", " + longitudeText;
+        showLocation.setText(locationText);
 
         return view;
 

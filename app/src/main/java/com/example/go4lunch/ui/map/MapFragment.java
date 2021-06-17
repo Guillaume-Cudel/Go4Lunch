@@ -13,11 +13,13 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
+
+import org.w3c.dom.Text;
 
 public class MapFragment extends Fragment {
 
-    ImageView image;
 
     public static MapFragment newInstance() {
         return (new MapFragment());
@@ -28,7 +30,8 @@ public class MapFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        image = (ImageView) view.findViewById(R.id.map_image_test);
+        ImageView image = (ImageView) view.findViewById(R.id.map_image_test);
+
 
 
         return view;
