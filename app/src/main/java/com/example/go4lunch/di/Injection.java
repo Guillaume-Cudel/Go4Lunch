@@ -42,7 +42,6 @@ public class Injection {
         RestaurantRepository repository = provideRestaurantRepository();
         return new ViewModelFactory(repository);
     }
-
     public static RestaurantViewModel provideRestaurantViewModel(FragmentActivity activity){
         ViewModelFactory mViewModelFactory = provideViewModelFactory();
         return new ViewModelProvider(activity, mViewModelFactory).get(RestaurantViewModel.class);

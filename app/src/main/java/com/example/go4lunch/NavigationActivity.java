@@ -45,7 +45,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class NavigationActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ActivityNavigationBinding binding;
-    BottomNavigationView mBottomNavigationView;
+    private BottomNavigationView mBottomNavigationView;
+    //private final GetLocation location;
 
     public Fragment fragmentMap;
     public Fragment fragmentRestaurantsList;
@@ -64,6 +65,10 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
+
+   /* public NavigationActivity(GetLocation location) {
+        this.location = location;
+    }*/
 
     //-----------------
 
@@ -99,6 +104,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         updateUIWhenCreating();
         onClickItemsDrawer();
+        //location.createRequestLocation();
         createRequestLocation();
 
     }
@@ -266,6 +272,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     @Override
     protected void onResume() {
         super.onResume();
+        //location.createRequestLocation();
         createRequestLocation();
     }
 
@@ -318,8 +325,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         }
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
     }
-
-
 
     public double getDoubleLongitude() {
         return longitude;

@@ -1,6 +1,7 @@
 package com.example.go4lunch.ui.workmates;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,18 @@ import com.example.go4lunch.R;
 
 public class WorkmatesFragment extends Fragment {
 
-    public WorkmatesFragment(){}
+    //private static GetLocation location;
 
+
+    public WorkmatesFragment(){}
 
     public static WorkmatesFragment newInstance() {
         return (new WorkmatesFragment());
     }
+
+    /*public WorkmatesFragment(GetLocation location){
+        this.location = location;
+    }*/
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -28,14 +35,17 @@ public class WorkmatesFragment extends Fragment {
         TextView textView = (TextView) view.findViewById(R.id.workmates_text);
         TextView showLocation = (TextView) view.findViewById(R.id.show_location);
 
-         NavigationActivity navigationActivity = (NavigationActivity) getActivity();
-         double mLongitude = navigationActivity.getDoubleLongitude();
-         double mLatitude = navigationActivity.getDoubleLatitude();
+        NavigationActivity navigationActivity = (NavigationActivity) getActivity();
+        double mLongitude = navigationActivity.getDoubleLongitude();
+        double mLatitude = navigationActivity.getDoubleLatitude();
+        /*double mLongitude = location.getLongitude();
+        double mLatitude = location.getLatitude();*/
 
         String latitudeText = Double.toString(mLatitude);
         String longitudeText = Double.toString(mLongitude);
         String locationText = latitudeText + ", " + longitudeText;
         showLocation.setText(locationText);
+        Log.d("localisation", locationText);
 
         return view;
 

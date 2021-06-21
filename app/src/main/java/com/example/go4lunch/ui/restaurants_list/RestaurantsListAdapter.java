@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.Restaurant;
 import com.jakewharton.picasso.OkHttp3Downloader;
-import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     private List<Restaurant> dataList;
     private Context context;
 
-    public RestaurantsListAdapter(List<Restaurant> dataList, Context context) {
+    public RestaurantsListAdapter(final List<Restaurant> dataList, Context context) {
         this.dataList = dataList;
         this.context = context;
     }
@@ -42,14 +41,16 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         Restaurant restaurant = dataList.get(position);
 
         holder.nameField.setText(restaurant.getName());
-        if (restaurant.getAddress() != null){ holder.addressField.setText(restaurant.getAddress());}
+        if (restaurant.getVicinity() != null){ holder.addressField.setText(restaurant.getVicinity());}
         if (restaurant.getKind() != null){holder.kindField.setText(restaurant.getKind());}
-        if (restaurant.getInformation() != null){holder.informationField.setText(restaurant.getInformation());}
+        if (restaurant.getOpening_hours() != null){holder.informationField.setText(restaurant.getOpening_hours());}
+        //double location = restaurant.getLocation();
+
            // if (restaurant.getDistance().equals(null)){ holder.distanceField.setText(restaurant.getDistance());}
-            if (restaurant.getImageURL() != null){
+            if (restaurant.getPhotos() != null){
                 Picasso.Builder builder = new Picasso.Builder(context);
                 builder.downloader(new OkHttp3Downloader(context));
-                builder.build().load(restaurant.getImageURL())
+                builder.build().load(restaurant.getPhotos())
                         .placeholder((R.drawable.ic_launcher_background))
                         .error(R.drawable.ic_launcher_background)
                         .into(holder.imageField);
@@ -60,6 +61,11 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         public int getItemCount() {
             return dataList.size();
         }
+
+    public void updateData(List<Restaurant> restaurants){
+        this.dataList = restaurants;
+        this.notifyDataSetChanged();
+    }
 
     class RestaurantsListViewHolder extends RecyclerView.ViewHolder {
 

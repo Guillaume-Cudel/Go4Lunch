@@ -1,100 +1,93 @@
 package com.example.go4lunch.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Restaurant {
 
 
     @SerializedName("name")
+    @Expose
     private String name;
-    @SerializedName("id")
-    private int id;
     @SerializedName("kind")
     private String kind;
-    @SerializedName("address")
-    private String address;
-    @SerializedName("information")
-    private String information;
-    @SerializedName("distance")
-    private int distance;
-    @SerializedName("note")
-    private double note;
-    @SerializedName("imageURL")
-    private String imageURL;
+    @SerializedName("vicinity")
+    private String vicinity;
+    @SerializedName("opening_hours")
+    private String opening_hours;
+    @SerializedName("location")
+    private double location;
+    @SerializedName("rating")
+    private double rating;
+    @SerializedName("photo_reference")
+    private String photos;
 
 
-    public Restaurant(String name, int id, String kind, String address, String information, int distance, double note, String imageURL) {
+    public Restaurant(String name, String kind, String vicinity, String opening_hours, double location, double rating, String photos) {
         this.name = name;
-        this.id = id;
+
         this.kind = kind;
-        this.address = address;
-        this.information = information;
-        this.distance = distance;
-        this.note = note;
-        this.imageURL = imageURL;
+        this.vicinity = vicinity;
+        this.opening_hours = opening_hours;
+        this.location = location;
+        this.rating = rating;
+        this.photos = photos;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getKind() {
-        return kind;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getInformation() {
-        return information;
-    }
-
-    public int getDistance() {
-        return distance;
-    }
-
-    public double getNote() {
-        return note;
-    }
-
-    public String getImageURL() {
-        return imageURL;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setId(int id) {
-        this.id = id;
+
+    public String getKind() {
+        return kind;
     }
 
     public void setKind(String kind) {
         this.kind = kind;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public String getVicinity() {
+        return vicinity;
     }
 
-    public void setInformation(String information) {
-        this.information = information;
+    public void setVicinity(String vicinity) {
+        this.vicinity = vicinity;
     }
 
-    public void setDistance(int distance) {
-        this.distance = distance;
+    public String getOpening_hours() {
+        return opening_hours;
     }
 
-    public void setNote(double note) {
-        this.note = note;
+    public void setOpening_hours(String opening_hours) {
+        this.opening_hours = opening_hours;
     }
 
-    public void setImageURL(String imageURL) {
-        this.imageURL = imageURL;
+    public double getLocation() {
+        return location;
+    }
+
+    public void setLocation(double location) {
+        this.location = location;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public String getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(String photos) {
+        this.photos = photos;
     }
 }

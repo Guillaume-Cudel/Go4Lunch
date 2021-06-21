@@ -18,15 +18,15 @@ public class RestaurantRepositoryImpl implements RestaurantRepository {
 
     @Override
     public void getRestaurants(String location, String radius, String type, String key, GetRestaurantsCallback callback) {
-        Call<List<Restaurant>> call = apiService.getAllRestaurants(location, radius, type, key);
-        call.enqueue(new Callback<List<Restaurant>>() {
+        Call<GetRestaurantsResponse> call = apiService.getAllRestaurants(location, radius, type, key);
+        call.enqueue(new Callback<GetRestaurantsResponse>() {
             @Override
-            public void onResponse(Call<List<Restaurant>> call, Response<List<Restaurant>> response) {
-                callback.onSuccess(response.body());
+            public void onResponse(Call<GetRestaurantsResponse> call, Response<GetRestaurantsResponse> response) {
+                callback.onSuccess(response.body().getResults());
             }
 
             @Override
-            public void onFailure(Call<List<Restaurant>> call, Throwable t) {
+            public void onFailure(Call<GetRestaurantsResponse> call, Throwable t) {
                 callback.onError(new Exception(t));
             }
         });
