@@ -1,22 +1,13 @@
-package com.example.go4lunch.network;
-
-import android.widget.Toast;
+package com.example.go4lunch.viewModel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.model.RestaurantRepository;
+import com.example.go4lunch.repository.RestaurantRepository;
 
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RestaurantViewModel extends ViewModel {
 

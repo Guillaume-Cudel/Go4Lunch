@@ -1,8 +1,8 @@
-package com.example.go4lunch.model;
+package com.example.go4lunch.repository;
 
+import com.example.go4lunch.model.requests.GetRestaurantsResponse;
 import com.example.go4lunch.network.ApiService;
-
-import java.util.List;
+import com.example.go4lunch.repository.RestaurantRepository;
 
 import retrofit2.Call;
 import retrofit2.Callback;

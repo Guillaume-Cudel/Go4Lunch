@@ -60,17 +60,10 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public FusedLocationProviderClient fusedLocation;
     public double longitude;
     public double latitude;
-   // public String longitudeText;
-   // public String latitudeText;
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
 
-   /* public NavigationActivity(GetLocation location) {
-        this.location = location;
-    }*/
-
-    //-----------------
 
     @Override
     public int getFragmentLayout() {

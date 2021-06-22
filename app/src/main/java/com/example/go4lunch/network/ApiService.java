@@ -1,13 +1,9 @@
 package com.example.go4lunch.network;
 
-import com.example.go4lunch.model.GetRestaurantsResponse;
-import com.example.go4lunch.model.Restaurant;
-
-import java.util.List;
+import com.example.go4lunch.model.requests.GetRestaurantsResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {

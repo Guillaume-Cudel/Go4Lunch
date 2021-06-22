@@ -24,6 +24,7 @@
         android:layout_marginStart="@dimen/ten"
         android:text="Restaurant name"
         android:textSize="15sp"
+        android:maxLength="25"
         android:textStyle="bold"
         android:textColor="@color/black"/>
 
@@ -35,7 +36,7 @@
         app:layout_constraintTop_toBottomOf="@+id/list_view_name"
         android:layout_marginTop="@dimen/five"
         android:text="French"
-        android:textSize="15sp"/>
+        android:textSize="12sp"/>
 
     <TextView
         android:id="@+id/list_view_space"
@@ -45,18 +46,18 @@
         app:layout_constraintBottom_toBottomOf="@id/list_view_kind_restaurant"
         android:layout_marginStart="@dimen/five"
         android:text=" - "
-        android:textSize="15sp"/>
+        android:textSize="12sp"/>
 
     <TextView
         android:id="@+id/list_view_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="180dp"
         app:layout_constraintStart_toEndOf="@id/list_view_space"
         app:layout_constraintBottom_toBottomOf="@id/list_view_kind_restaurant"
         android:layout_marginStart="@dimen/five"
         android:text="5 rue des marguerites"
-        android:textSize="15sp"/>
+        android:textSize="10sp"
+        android:maxLength="35"/>
 
     <TextView
         android:id="@+id/list_view_informations"

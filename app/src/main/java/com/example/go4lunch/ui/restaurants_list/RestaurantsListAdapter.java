@@ -42,19 +42,19 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
         holder.nameField.setText(restaurant.getName());
         if (restaurant.getVicinity() != null){ holder.addressField.setText(restaurant.getVicinity());}
-        if (restaurant.getKind() != null){holder.kindField.setText(restaurant.getKind());}
-        if (restaurant.getOpening_hours() != null){holder.informationField.setText(restaurant.getOpening_hours());}
+        //if (restaurant.getTypes() != null){holder.kindField.setText(restaurant.getTypes());}
+        if (restaurant.getOpening_hours() != null){holder.informationField.setText(restaurant.getOpening_hours().getOpenNow());}
         //double location = restaurant.getLocation();
 
            // if (restaurant.getDistance().equals(null)){ holder.distanceField.setText(restaurant.getDistance());}
-            if (restaurant.getPhotos() != null){
+            /*if (restaurant.getPhotos() != null){
                 Picasso.Builder builder = new Picasso.Builder(context);
                 builder.downloader(new OkHttp3Downloader(context));
-                builder.build().load(restaurant.getPhotos())
+                builder.build().load(restaurant.getPhotos().getPhotoRef())
                         .placeholder((R.drawable.ic_launcher_background))
                         .error(R.drawable.ic_launcher_background)
                         .into(holder.imageField);
-            }
+            }*/
         }
 
         @Override

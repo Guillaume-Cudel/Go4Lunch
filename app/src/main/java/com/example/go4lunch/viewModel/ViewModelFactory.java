@@ -1,10 +1,10 @@
-package com.example.go4lunch.network;
+package com.example.go4lunch.viewModel;
 
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.model.RestaurantRepository;
+import com.example.go4lunch.repository.RestaurantRepository;
+import com.example.go4lunch.viewModel.RestaurantViewModel;
 
 public class ViewModelFactory implements ViewModelProvider.Factory {
 

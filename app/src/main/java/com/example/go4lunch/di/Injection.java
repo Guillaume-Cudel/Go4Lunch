@@ -1,18 +1,13 @@
 package com.example.go4lunch.di;
 
-import android.app.Activity;
-import android.content.Context;
-
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
-import com.example.go4lunch.model.RestaurantRepository;
-import com.example.go4lunch.model.RestaurantRepositoryImpl;
+import com.example.go4lunch.repository.RestaurantRepository;
+import com.example.go4lunch.repository.RestaurantRepositoryImpl;
 import com.example.go4lunch.network.ApiService;
-import com.example.go4lunch.network.RestaurantViewModel;
-import com.example.go4lunch.network.ViewModelFactory;
+import com.example.go4lunch.viewModel.RestaurantViewModel;
+import com.example.go4lunch.viewModel.ViewModelFactory;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

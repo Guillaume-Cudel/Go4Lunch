@@ -1,4 +1,6 @@
-package com.example.go4lunch.model;
+package com.example.go4lunch.repository;
+
+import com.example.go4lunch.model.Restaurant;
 
 import java.util.List;
 

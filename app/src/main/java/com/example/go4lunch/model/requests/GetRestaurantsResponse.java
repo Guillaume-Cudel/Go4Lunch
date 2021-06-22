@@ -1,4 +1,6 @@
-package com.example.go4lunch.model;
+package com.example.go4lunch.model.requests;
+
+import com.example.go4lunch.model.Restaurant;
 
 import java.util.List;
 
@@ -10,7 +12,5 @@ public class GetRestaurantsResponse {
         return results;
     }
 
-    public void setResults(List<Restaurant> results) {
-        this.results = results;
-    }
+
 }

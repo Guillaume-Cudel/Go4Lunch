@@ -16,13 +16,14 @@ import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
-import com.example.go4lunch.network.RestaurantViewModel;
+import com.example.go4lunch.viewModel.RestaurantViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class RestaurantsListFragment extends Fragment {
+
 
     private RestaurantViewModel viewModel;
     private RecyclerView recyclerView;
@@ -51,9 +52,9 @@ public class RestaurantsListFragment extends Fragment {
 
         Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
             @Override
-            public void onChanged(List<Restaurant> restaurants) {
+            public void onChanged(List<Restaurant> restaurantsList) {
                 RestaurantsListFragment.this.restaurantsList.clear();
-                RestaurantsListFragment.this.restaurantsList.addAll(restaurants);
+                RestaurantsListFragment.this.restaurantsList.addAll(restaurantsList);
                 updateRestaurants();
             }
         });
@@ -66,10 +67,10 @@ public class RestaurantsListFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_restaurants_list, container, false);
 
+
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_restaurant_list);
 
         return view;
-
     }
 
 
