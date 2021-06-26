@@ -32,7 +32,7 @@ public class RestaurantsListFragment extends Fragment {
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, this.getActivity());
 
 
-    public RestaurantsListFragment() {
+    public RestaurantsListFragment( ) {
     }
 
     public static RestaurantsListFragment newInstance() {
@@ -84,5 +84,5 @@ public class RestaurantsListFragment extends Fragment {
     private void updateRestaurants(){
         adapter.updateData(restaurantsList);
     }
-    
+
 }

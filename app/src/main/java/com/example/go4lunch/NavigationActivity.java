@@ -327,6 +327,4 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         return latitude;
     }
 
-
-
 }
