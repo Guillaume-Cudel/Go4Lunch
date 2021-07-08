@@ -1,6 +1,9 @@
 package com.example.go4lunch.ui.restaurants_list;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,8 +60,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
         Restaurant restaurant = dataList.get(position);
 
-        double currentLatitude = mlatlng.latitude;
-
             if (restaurant.getPhotos() != null) {
                 photoData = restaurant.getPhotos().get(0).getPhotoReference();
                 photoWidth = restaurant.getPhotos().get(0).getWidth();
@@ -76,9 +77,19 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         }
 
         if (restaurant.getOpening_hours() != null) {
-            String opening = "Open: " + restaurant.getOpening_hours().getOpenNow();
-            holder.informationField.setText(opening);
+            if (restaurant.getOpening_hours().getOpenNow().equals("true")){
+                String open = "Open";
+                holder.informationField.setText(open);
+                holder.informationField.setTypeface(null, Typeface.BOLD);
+                holder.informationField.setTextColor(Color.GREEN);
+            }else{
+                String close = "Close";
+                holder.informationField.setText(close);
+                holder.informationField.setTypeface(null, Typeface.BOLD);
+                holder.informationField.setTextColor(Color.RED);
             }
+        }
+
         if(restaurant.getRating() != null){
             holder.displayStarsRating();
         }
@@ -87,12 +98,20 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         holder.distanceField.setText(distance);
 
 
-            Picasso.Builder builder = new Picasso.Builder(context);
-            builder.downloader(new OkHttp3Downloader(context));
-            builder.build().load(parseDataPhotoToImage())
-                           .placeholder((R.drawable.ic_launcher_background))
-                           .error(R.drawable.ic_baseline_outdoor_grill_24)
-                           .into(holder.imageField);
+        Picasso.Builder builder = new Picasso.Builder(context);
+        builder.downloader(new OkHttp3Downloader(context));
+        builder.build().load(parseDataPhotoToImage())
+                .placeholder((R.drawable.ic_launcher_background))
+                .error(R.drawable.ic_baseline_outdoor_grill_24)
+                .into(holder.imageField);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent();
+                // todo continue tranfert data in to the profilActivity
+            }
+        });
 
 
         }
@@ -162,12 +181,9 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
     private String getDistanceInMeters(){
 
+        // get current location
         double currentLatitude = mlatlng.latitude;
         double currentLongitude = mlatlng.longitude;
-
-        // todo get current location
-
-
 
         double rLatitude = Double.parseDouble(String.valueOf(restaurantLatitude));
         double rLongitude = Double.parseDouble(String.valueOf(restaurantLongitude));
@@ -186,10 +202,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
         return distance;
     }
-
-
-
-
 
     }
 
