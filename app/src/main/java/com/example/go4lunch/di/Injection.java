@@ -4,8 +4,9 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.go4lunch.repository.RestaurantRepository;
-import com.example.go4lunch.repository.RestaurantRepositoryImpl;
 import com.example.go4lunch.network.ApiService;
+import com.example.go4lunch.repository.RestaurantRepositoryImpl;
+import com.example.go4lunch.viewModel.LocationViewModel;
 import com.example.go4lunch.viewModel.RestaurantViewModel;
 import com.example.go4lunch.viewModel.ViewModelFactory;
 
@@ -28,7 +29,6 @@ public class Injection {
     }
 
     public static RestaurantRepository provideRestaurantRepository(){
-
         ApiService apiService = provideApiService();
         return new RestaurantRepositoryImpl(apiService);
     }
@@ -40,6 +40,10 @@ public class Injection {
     public static RestaurantViewModel provideRestaurantViewModel(FragmentActivity activity){
         ViewModelFactory mViewModelFactory = provideViewModelFactory();
         return new ViewModelProvider(activity, mViewModelFactory).get(RestaurantViewModel.class);
+    }
+
+    public static LocationViewModel provideLocationViewModel(FragmentActivity activity){
+        return new ViewModelProvider(activity).get(LocationViewModel.class);
     }
 
 

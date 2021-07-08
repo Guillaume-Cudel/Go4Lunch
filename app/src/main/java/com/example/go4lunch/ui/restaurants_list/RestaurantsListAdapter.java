@@ -9,11 +9,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
+import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.viewModel.LocationViewModel;
+import com.google.android.gms.maps.model.LatLng;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
@@ -28,13 +36,12 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     private String MAX_WIDTH = "maxwidth=";
     private String PHOTOREFERENCE = "&photoreference=";
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
+    private LatLng mlatlng;
 
-
-
-
-
-    public RestaurantsListAdapter(final List<Restaurant> dataList, Context context) {
+// todo add LatLng in constrructor
+    public RestaurantsListAdapter(final List<Restaurant> dataList, LatLng latlng, Context context) {
         this.dataList = dataList;
+        this.mlatlng = latlng;
         this.context = context;
     }
 
@@ -50,6 +57,8 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
         Restaurant restaurant = dataList.get(position);
 
+        double currentLatitude = mlatlng.latitude;
+
             if (restaurant.getPhotos() != null) {
                 photoData = restaurant.getPhotos().get(0).getPhotoReference();
                 photoWidth = restaurant.getPhotos().get(0).getWidth();
@@ -61,9 +70,15 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
         holder.nameField.setText(restaurant.getName());
         if (restaurant.getVicinity() != null){ holder.addressField.setText(restaurant.getVicinity());}
-        //if (restaurant.getTypes() != null){holder.kindField.setText(restaurant.getTypes());}
-        String opening = "Open: " + restaurant.getOpening_hours().getOpenNow();
-        if (restaurant.getOpening_hours() != null){holder.informationField.setText(opening);}
+        if (restaurant.getTypes() != null){
+            String types = restaurant.getTypes().get(0);
+            holder.kindField.setText(types);
+        }
+
+        if (restaurant.getOpening_hours() != null) {
+            String opening = "Open: " + restaurant.getOpening_hours().getOpenNow();
+            holder.informationField.setText(opening);
+            }
         if(restaurant.getRating() != null){
             holder.displayStarsRating();
         }
@@ -92,6 +107,11 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         this.notifyDataSetChanged();
     }
 
+    public void updateLocation(LatLng latLng){
+        this.mlatlng = latLng;
+        this.notifyDataSetChanged();
+    }
+
 
     class RestaurantsListViewHolder extends RecyclerView.ViewHolder {
 
@@ -103,7 +123,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         private final TextView addressField;
         private final TextView informationField;
         private final TextView distanceField;
-        private final ImageView noteField1;
         private final ImageView noteField2;
         private final ImageView noteField3;
 
@@ -117,7 +136,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             addressField = mView.findViewById(R.id.list_view_address);
             informationField = mView.findViewById(R.id.list_view_informations);
             distanceField = mView.findViewById(R.id.list_view_distance);
-            noteField1 = mView.findViewById(R.id.list_view_star_1);
             noteField2 = mView.findViewById(R.id.list_view_star_2);
             noteField3 = mView.findViewById(R.id.list_view_star_3);
         }
@@ -143,13 +161,13 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     }
 
     private String getDistanceInMeters(){
-        double currentLatitude = 0;
-        double currentLongitude = 0;
-        if(context instanceof NavigationActivity){
-            NavigationActivity activity = (NavigationActivity) context;
-            currentLatitude =  activity.getDoubleLatitude() ;
-            currentLongitude = activity.getDoubleLongitude();
-        }
+
+        double currentLatitude = mlatlng.latitude;
+        double currentLongitude = mlatlng.longitude;
+
+        // todo get current location
+
+
 
         double rLatitude = Double.parseDouble(String.valueOf(restaurantLatitude));
         double rLongitude = Double.parseDouble(String.valueOf(restaurantLongitude));

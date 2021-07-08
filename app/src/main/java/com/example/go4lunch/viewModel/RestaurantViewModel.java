@@ -15,12 +15,14 @@ public class RestaurantViewModel extends ViewModel {
     private static final String RADIUS = "1000";
     private static final String TYPE = "restaurant";
     public MutableLiveData<List<Restaurant>> restaurantListLiveData;
-    private final RestaurantRepository repository;
 
+    private final RestaurantRepository restaurantRepository;
 
-    public RestaurantViewModel(RestaurantRepository repository) {
-        this.repository = repository;
+    public RestaurantViewModel(RestaurantRepository restaurantRepository) {
+        this.restaurantRepository = restaurantRepository;
     }
+
+
 
 
     public LiveData<List<Restaurant>> getRestaurants(String location) {
@@ -34,7 +36,7 @@ public class RestaurantViewModel extends ViewModel {
 
     private void loadRestaurants(String location) {
 
-        repository.getRestaurants(location, RADIUS, TYPE, API_KEY, new RestaurantRepository.GetRestaurantsCallback() {
+        restaurantRepository.getRestaurants(location, RADIUS, TYPE, API_KEY, new RestaurantRepository.GetRestaurantsCallback() {
             @Override
             public void onSuccess(List<Restaurant> restaurants) {
                 restaurantListLiveData.postValue(restaurants);

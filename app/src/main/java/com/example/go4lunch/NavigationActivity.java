@@ -25,11 +25,12 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
+import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
 import com.example.go4lunch.ui.workmates.WorkmatesFragment;
-import com.google.android.gms.location.FusedLocationProviderClient;
+import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -46,7 +47,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     private ActivityNavigationBinding binding;
     private BottomNavigationView mBottomNavigationView;
-    //private final GetLocation location;
+    private LocationViewModel locationViewModel;
+
 
     public Fragment fragmentMap;
     public Fragment fragmentRestaurantsList;
@@ -55,11 +57,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private static final int FRAGMENT_MAP = 0;
     private static final int FRAGMENT_RESTAURANT = 1;
     private static final int FRAGMENT_WORKMATES = 2;
-
-    // Location
-    public FusedLocationProviderClient fusedLocation;
-    public double longitude;
-    public double latitude;
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
@@ -79,6 +76,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         mBottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation_bottom_nav_view);
 
+        locationViewModel = Injection.provideLocationViewModel(this);
+
 
         // Show the first fragment when starting activity
         fragmentMap = new MapFragment();
@@ -97,7 +96,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         updateUIWhenCreating();
         onClickItemsDrawer();
-        //location.createRequestLocation();
         createRequestLocation();
 
     }
@@ -265,7 +263,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     @Override
     protected void onResume() {
         super.onResume();
-        //location.createRequestLocation();
         createRequestLocation();
     }
 
@@ -299,15 +296,14 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         LocationCallback locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
-                //super.onLocationResult(locationResult);
                 if (locationResult == null) {
                     return;
                 }
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
 
-                        longitude = location.getLongitude();
-                        latitude = location.getLatitude();
+                        locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
+
                     }
                 }
             }
@@ -319,12 +315,13 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
-    public double getDoubleLongitude() {
+    /*public double getDoubleLongitude() {
         return longitude;
     }
 
     public double getDoubleLatitude() {
         return latitude;
-    }
+    }*/
+
 
 }

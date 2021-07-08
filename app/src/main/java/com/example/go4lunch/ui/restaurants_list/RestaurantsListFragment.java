@@ -1,6 +1,7 @@
 package com.example.go4lunch.ui.restaurants_list;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,7 +18,9 @@ import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.viewModel.LocationViewModel;
 import com.example.go4lunch.viewModel.RestaurantViewModel;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +29,15 @@ import java.util.List;
 public class RestaurantsListFragment extends Fragment {
 
 
-    private RestaurantViewModel viewModel;
+
     private RecyclerView recyclerView;
     @NonNull
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
-    private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, this.getActivity());
+    private LatLng mLatlng;
+    // todo add latlng
+    private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
+    private LocationViewModel locationViewModel;
+
 
 
     public RestaurantsListFragment( ) {
@@ -39,16 +47,30 @@ public class RestaurantsListFragment extends Fragment {
         return (new RestaurantsListFragment());
     }
 
+    private void initViewModel(){
+
+        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
+        locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
+            @Override
+            public void onChanged(LatLng latLng) {
+                mLatlng = latLng;
+                updateLocation();
+            }
+        });
+    }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        NavigationActivity navigationActivity = (NavigationActivity) getActivity();
-        double mLongitude = navigationActivity.getDoubleLongitude();
-        double mLatitude = navigationActivity.getDoubleLatitude();
-        String longitudeText = Double.toString(mLongitude);
-        String latitudeText =  Double.toString(mLatitude);
-        String locationText = latitudeText + "," + longitudeText;
+
+        initViewModel();
+
+        double latitude = mLatlng.latitude;
+        double longitude = mLatlng.longitude;
+        String locationText = latitude + "," + longitude;
+        Log.d("localisation", locationText);
+
 
         Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
             @Override
@@ -77,12 +99,16 @@ public class RestaurantsListFragment extends Fragment {
     private void configureRecyclerView() {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getActivity());
         recyclerView.setLayoutManager(layoutManager);
-        this.adapter = new RestaurantsListAdapter(restaurantsList, this.getActivity());
+        this.adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
         recyclerView.setAdapter(adapter);
     }
 
     private void updateRestaurants(){
         adapter.updateData(restaurantsList);
+    }
+
+    private void updateLocation(){
+        adapter.updateLocation(mLatlng);
     }
 
 }

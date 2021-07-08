@@ -57,7 +57,7 @@
         android:layout_marginStart="@dimen/five"
         android:text="5 rue des marguerites"
         android:textSize="10sp"
-        android:maxLength="35"/>
+        android:maxLength="30"/>
 
     <TextView
         android:id="@+id/list_view_informations"
@@ -66,7 +66,7 @@
         app:layout_constraintStart_toStartOf="@+id/list_view_name"
         app:layout_constraintTop_toBottomOf="@id/list_view_kind_restaurant"
         android:layout_marginTop="@dimen/five"
-        android:text="Open until 7pm"
+        android:text="No opening information"
         android:textStyle="italic"/>
 
     <TextView

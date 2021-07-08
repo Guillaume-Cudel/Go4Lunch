@@ -28,11 +28,14 @@ public class Restaurant {
     @SerializedName("photos")
     @Expose
     private List<Photos> photos;
+    @SerializedName("types")
+    @Expose
+    private List<String> types;
 
 
 
     public Restaurant(String name, String vicinity, OpeningHours opening_hours, Geometry geometry,
-                      String rating, List<Photos> photos) {
+                      String rating, List<Photos> photos, List<String> types) {
 
         this.name = name;
         this.vicinity = vicinity;
@@ -40,13 +43,12 @@ public class Restaurant {
         this.geometry = geometry;
         this.rating = rating;
         this.photos = photos;
+        this.types = types;
     }
 
     public String getName() {
         return name;
     }
-
-
 
     public String getVicinity() {
         return vicinity;
@@ -68,6 +70,7 @@ public class Restaurant {
         return rating;
     }
 
-
-
+    public List<String> getTypes() {
+        return types;
+    }
 }
