@@ -32,6 +32,9 @@ public class Restaurant {
     @Expose
     private List<String> types;
 
+    @SerializedName("place_id")
+    @Expose
+    private String place_id;
 
 
     public Restaurant(String name, String vicinity, OpeningHours opening_hours, Geometry geometry,
@@ -72,5 +75,9 @@ public class Restaurant {
 
     public List<String> getTypes() {
         return types;
+    }
+
+    public String getPlace_id() {
+        return place_id;
     }
 }

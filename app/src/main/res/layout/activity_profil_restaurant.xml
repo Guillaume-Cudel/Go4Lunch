@@ -28,11 +28,11 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="@+id/view_color"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
         android:text="Le Flannery's"
         android:textStyle="bold"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textColor="@color/white"/>
 
     <ImageView
@@ -69,9 +69,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="@+id/restaurant_title"
         app:layout_constraintTop_toBottomOf="@+id/restaurant_title"
-        android:layout_marginTop="@dimen/five"
+        android:layout_marginTop="15dp"
         android:text="French restaurant"
-        android:textSize="15sp"
+        android:textSize="12sp"
         android:textColor="@color/white"/>
 
     <TextView
@@ -83,25 +83,25 @@
         android:layout_marginStart="@dimen/five"
         android:text=" - "
         android:textColor="@color/white"
-        android:textSize="15sp"/>
+        android:textSize="12sp"/>
 
     <TextView
         android:id="@+id/restaurant_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="180dp"
         app:layout_constraintStart_toEndOf="@id/restaurant_view_space"
         app:layout_constraintBottom_toBottomOf="@+id/restaurant_kind"
         android:layout_marginStart="@dimen/five"
         android:text="5 rue des marguerites"
+        android:maxLength="35"
         android:textColor="@color/white"
-        android:textSize="15sp"/>
+        android:textSize="12sp"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/restaurant_choice_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="48dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toBottomOf="@id/restaurant_title"
         app:layout_constraintEnd_toEndOf="parent"
@@ -109,14 +109,16 @@
         app:tint="@color/orange"
         app:backgroundTint="@color/white"/>
 
-    <View
+
+    <FrameLayout
         android:id="@+id/view_call"
         android:layout_width="90dp"
         android:layout_height="100dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view_color"
         android:layout_marginStart="40dp"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:focusable="true" />
 
     <ImageView
         android:id="@+id/call_image"

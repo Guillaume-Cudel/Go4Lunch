@@ -1,8 +1,8 @@
 package com.example.go4lunch.repository;
 
+import com.example.go4lunch.model.requests.GetDetailsResponse;
 import com.example.go4lunch.model.requests.GetRestaurantsResponse;
 import com.example.go4lunch.network.ApiService;
-import com.example.go4lunch.repository.RestaurantRepository;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,6 +27,22 @@ public class RestaurantRepositoryImpl implements RestaurantRepository {
 
             @Override
             public void onFailure(Call<GetRestaurantsResponse> call, Throwable t) {
+                callback.onError(new Exception(t));
+            }
+        });
+    }
+
+    @Override
+    public void getDetails(String placeID, String fields, String key, GetDetailsCallback callback){
+        Call<GetDetailsResponse> call = apiService.getDetails(placeID, fields, key);
+        call.enqueue(new Callback<GetDetailsResponse>() {
+            @Override
+            public void onResponse(Call<GetDetailsResponse> call, Response<GetDetailsResponse> response) {
+                callback.onSuccess(response.body().getResult());
+            }
+
+            @Override
+            public void onFailure(Call<GetDetailsResponse> call, Throwable t) {
                 callback.onError(new Exception(t));
             }
         });

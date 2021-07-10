@@ -1,5 +1,6 @@
 package com.example.go4lunch.network;
 
+import com.example.go4lunch.model.requests.GetDetailsResponse;
 import com.example.go4lunch.model.requests.GetRestaurantsResponse;
 
 import retrofit2.Call;
@@ -15,7 +16,11 @@ public interface ApiService {
                                                    @Query("type") String type, @Query("key") String key);
 
 
-
-
     // https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=43.6536576,1.4419125&radius=1000&type=restaurant&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704
+
+
+    @GET("details/json?")
+    Call<GetDetailsResponse> getDetails(@Query("place_id") String placeID, @Query("fields") String fields, @Query("key") String key);
+
+    //https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJJVG1yI-krhIRHg0g-oZVtcU&fields=formatted_phone_number,opening_hours,website&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704
 }

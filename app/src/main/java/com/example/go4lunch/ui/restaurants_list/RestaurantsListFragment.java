@@ -34,7 +34,6 @@ public class RestaurantsListFragment extends Fragment {
     @NonNull
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
     private LatLng mLatlng;
-    // todo add latlng
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
     private LocationViewModel locationViewModel;
 
@@ -95,6 +94,8 @@ public class RestaurantsListFragment extends Fragment {
         return view;
     }
 
+    // todo  add onActivityResult to recove weekDay text
+
 
     private void configureRecyclerView() {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getActivity());
@@ -102,6 +103,7 @@ public class RestaurantsListFragment extends Fragment {
         this.adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
         recyclerView.setAdapter(adapter);
     }
+
 
     private void updateRestaurants(){
         adapter.updateData(restaurantsList);

@@ -1,5 +1,6 @@
 package com.example.go4lunch.ui.restaurants_list;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -19,8 +20,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
+import com.example.go4lunch.RestaurantProfilActivity;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.viewModel.LocationViewModel;
@@ -38,10 +41,11 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     private String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
     private String MAX_WIDTH = "maxwidth=";
     private String PHOTOREFERENCE = "&photoreference=";
+    public static final int REQUEST_RESTAURANTS_DETAILS = 42;
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
     private LatLng mlatlng;
 
-// todo add LatLng in constrructor
+
     public RestaurantsListAdapter(final List<Restaurant> dataList, LatLng latlng, Context context) {
         this.dataList = dataList;
         this.mlatlng = latlng;
@@ -55,34 +59,32 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         return new RestaurantsListViewHolder(view);
     }
 
-        @Override
-        public void onBindViewHolder(RestaurantsListViewHolder holder, int position) {
+    @Override
+    public void onBindViewHolder(RestaurantsListViewHolder holder, int position) {
 
-        Restaurant restaurant = dataList.get(position);
-
-            if (restaurant.getPhotos() != null) {
-                photoData = restaurant.getPhotos().get(0).getPhotoReference();
-                photoWidth = restaurant.getPhotos().get(0).getWidth();
-            }
+        Restaurant restaurant = dataList.get(holder.getAdapterPosition());
+        String placeID = restaurant.getPlace_id();
         rating = restaurant.getRating();
         restaurantLatitude = restaurant.getGeometry().getLocation().getLat();
         restaurantLongitude = restaurant.getGeometry().getLocation().getLng();
 
 
         holder.nameField.setText(restaurant.getName());
-        if (restaurant.getVicinity() != null){ holder.addressField.setText(restaurant.getVicinity());}
-        if (restaurant.getTypes() != null){
-            String types = restaurant.getTypes().get(0);
-            holder.kindField.setText(types);
+        if (restaurant.getVicinity() != null) {
+            holder.addressField.setText(restaurant.getVicinity());
+        }
+
+        if (restaurant.getTypes() != null) {
+            holder.kindField.setText(restaurant.getTypes().get(0));
         }
 
         if (restaurant.getOpening_hours() != null) {
-            if (restaurant.getOpening_hours().getOpenNow().equals("true")){
+            if (restaurant.getOpening_hours().getOpenNow().equals("true")) {
                 String open = "Open";
                 holder.informationField.setText(open);
                 holder.informationField.setTypeface(null, Typeface.BOLD);
                 holder.informationField.setTextColor(Color.GREEN);
-            }else{
+            } else {
                 String close = "Close";
                 holder.informationField.setText(close);
                 holder.informationField.setTypeface(null, Typeface.BOLD);
@@ -90,7 +92,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             }
         }
 
-        if(restaurant.getRating() != null){
+        if (restaurant.getRating() != null) {
             holder.displayStarsRating();
         }
 
@@ -98,35 +100,55 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         holder.distanceField.setText(distance);
 
 
-        Picasso.Builder builder = new Picasso.Builder(context);
+        if (restaurant.getPhotos() != null) {
+            photoData = restaurant.getPhotos().get(0).getPhotoReference();
+            photoWidth = restaurant.getPhotos().get(0).getWidth();
+        }
+
+        /*Picasso.Builder builder = new Picasso.Builder(context);
         builder.downloader(new OkHttp3Downloader(context));
         builder.build().load(parseDataPhotoToImage())
                 .placeholder((R.drawable.ic_launcher_background))
                 .error(R.drawable.ic_baseline_outdoor_grill_24)
+                .into(holder.imageField);*/
+
+        Glide.with(context).load(parseDataPhotoToImage())
                 .into(holder.imageField);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent();
-                // todo continue tranfert data in to the profilActivity
+
+
+                Intent i = new Intent(context, RestaurantProfilActivity.class);
+                i.putExtra("place_id", placeID);
+                i.putExtra("name", restaurant.getName());
+                i.putExtra("photo", photoData);
+                i.putExtra("photoWidth", photoWidth);
+                i.putExtra("vicinity", restaurant.getVicinity());
+                i.putExtra("type", restaurant.getTypes().get(0));
+                i.putExtra("rate", rating);
+                ((Activity) context).startActivityForResult(i, REQUEST_RESTAURANTS_DETAILS);
+
             }
         });
 
+    }
 
-        }
+    @Override
+    public int getItemCount() {
+        if (dataList.size() == 0) {
+            return 0;
+        }else
+        return dataList.size();
+    }
 
-        @Override
-        public int getItemCount() {
-            return dataList.size();
-        }
-
-    public void updateData(List<Restaurant> restaurants){
+    public void updateData(List<Restaurant> restaurants) {
         this.dataList = restaurants;
         this.notifyDataSetChanged();
     }
 
-    public void updateLocation(LatLng latLng){
+    public void updateLocation(LatLng latLng) {
         this.mlatlng = latLng;
         this.notifyDataSetChanged();
     }
@@ -159,19 +181,19 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             noteField3 = mView.findViewById(R.id.list_view_star_3);
         }
 
-        private void displayStarsRating(){
+        private void displayStarsRating() {
             double dRating = Double.parseDouble(rating);
-            if (dRating <= 1.67){
+            if (dRating <= 1.67) {
                 noteField3.setVisibility(View.INVISIBLE);
                 noteField2.setVisibility(View.INVISIBLE);
             }
-            if(dRating > 1.67 && dRating < 3.4){
+            if (dRating > 1.67 && dRating < 3.4) {
                 noteField3.setVisibility(View.INVISIBLE);
             }
         }
     }
 
-    private String parseDataPhotoToImage(){
+    private String parseDataPhotoToImage() {
 
         return new StringBuilder().append(PLACES_API_BASE).append(MAX_WIDTH).append(photoWidth)
                 .append(PHOTOREFERENCE).append(photoData).append(API_KEY).toString();
@@ -179,7 +201,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         //https://maps.googleapis.com/maps/api/place/photo?maxwidth=4032&photoreference=ATtYBwKU4gK6Y-aRIDxoRKq8wRs3se36xK49g0PS-O2iLg-NS_osj85NapJsY-aNHOk2MyZYisu2YN013wX5VlfvvbkyIfiYimscYJImUq_jfRCPjOOl3fNIuJyrFDnWoP64tbFfZF1Aja5WaWyISM6BOW0lvsmjySrvMiRUjC03_NCKxILK&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704
     }
 
-    private String getDistanceInMeters(){
+    private String getDistanceInMeters() {
 
         // get current location
         double currentLatitude = mlatlng.latitude;
@@ -203,5 +225,5 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         return distance;
     }
 
-    }
+}
 
