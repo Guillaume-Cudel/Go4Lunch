@@ -6,6 +6,7 @@ import com.example.go4lunch.model.requests.Photos;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class Restaurant {

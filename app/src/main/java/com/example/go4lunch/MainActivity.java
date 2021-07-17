@@ -74,7 +74,6 @@ public class MainActivity extends BaseActivity {
         binding.googleSignInButton.setSize(SignInButton.SIZE_STANDARD);
         onClickGoogleButton();
         onClickFacebookButton();
-        onClickSignOutButton();
     }
 
     private void onClickGoogleButton() {
@@ -94,16 +93,6 @@ public class MainActivity extends BaseActivity {
             }
         });
     }
-
-    private void onClickSignOutButton() {
-        binding.signOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-            }
-        });
-    }
-
 
     // NAVIGATION
 

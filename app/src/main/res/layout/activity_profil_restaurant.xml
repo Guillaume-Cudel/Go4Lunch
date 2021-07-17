@@ -129,7 +129,9 @@
         app:layout_constraintTop_toTopOf="@+id/view_call"
         android:layout_marginTop="15dp"
         android:src="@drawable/ic_baseline_call"
-        app:tint="@color/orange" />
+        app:tint="@color/orange"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <TextView
         android:id="@+id/call_text"
@@ -142,16 +144,19 @@
         android:text="Call"
         android:textStyle="bold"
         android:textSize="20sp"
-        android:textColor="@color/orange"/>
+        android:textColor="@color/orange"
+        android:clickable="true"
+        android:focusable="true"/>
 
 
-    <View
+    <FrameLayout
         android:id="@+id/view_like"
         android:layout_width="90dp"
         android:layout_height="100dp"
         app:layout_constraintStart_toEndOf="@+id/view_call"
         app:layout_constraintTop_toTopOf="@+id/view_call"        android:layout_marginStart="30dp"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:focusable="true"/>
 
     <ImageView
         android:id="@+id/like_image"
@@ -175,14 +180,15 @@
         android:textSize="20sp"
         android:textColor="@color/orange"/>
 
-    <View
+    <FrameLayout
         android:id="@+id/view_website"
         android:layout_width="90dp"
         android:layout_height="100dp"
         app:layout_constraintStart_toEndOf="@+id/view_like"
         app:layout_constraintTop_toTopOf="@+id/view_call"
         android:layout_marginStart="30dp"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:focusable="true"/>
 
     <ImageView
         android:id="@+id/website_image"
@@ -192,7 +198,9 @@
         app:layout_constraintEnd_toEndOf="@+id/view_website"
         app:layout_constraintTop_toTopOf="@+id/call_image"
         android:src="@drawable/ic_baseline_public"
-        app:tint="@color/orange" />
+        app:tint="@color/orange"
+        android:clickable="true"
+        android:focusable="true"/>
 
     <TextView
         android:id="@+id/website_text"

@@ -26,21 +26,19 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.RestaurantProfilActivity;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.model.requests.Photos;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsListAdapter.RestaurantsListViewHolder> {
 
     private List<Restaurant> dataList;
     private Context context;
-    private final String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
-    private String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
-    private String MAX_WIDTH = "maxwidth=";
-    private String PHOTOREFERENCE = "&photoreference=";
     public static final int REQUEST_RESTAURANTS_DETAILS = 42;
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
     private LatLng mlatlng;
@@ -70,6 +68,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
 
         holder.nameField.setText(restaurant.getName());
+
         if (restaurant.getVicinity() != null) {
             holder.addressField.setText(restaurant.getVicinity());
         }
@@ -101,30 +100,29 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
 
         if (restaurant.getPhotos() != null) {
-            photoData = restaurant.getPhotos().get(0).getPhotoReference();
-            photoWidth = restaurant.getPhotos().get(0).getWidth();
+            List<Photos> photoInformation = restaurant.getPhotos();
+            photoData = photoInformation.get(0).getPhotoReference();
+            photoWidth = photoInformation.get(0).getWidth();
+
+            Glide.with(context).load(parseDataPhotoToImage())
+                    .into(holder.imageField);
+        }else{
+            Glide.with(context).load(R.drawable.restaurantjardin).into(holder.imageField);
+
         }
-
-        /*Picasso.Builder builder = new Picasso.Builder(context);
-        builder.downloader(new OkHttp3Downloader(context));
-        builder.build().load(parseDataPhotoToImage())
-                .placeholder((R.drawable.ic_launcher_background))
-                .error(R.drawable.ic_baseline_outdoor_grill_24)
-                .into(holder.imageField);*/
-
-        Glide.with(context).load(parseDataPhotoToImage())
-                .into(holder.imageField);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 Intent i = new Intent(context, RestaurantProfilActivity.class);
                 i.putExtra("place_id", placeID);
                 i.putExtra("name", restaurant.getName());
-                i.putExtra("photo", photoData);
-                i.putExtra("photoWidth", photoWidth);
+                if (restaurant.getPhotos() != null) {
+                    String photoToSend = restaurant.getPhotos().get(0).getPhotoReference();
+                    String photoWidthToSend = restaurant.getPhotos().get(0).getWidth();
+                    i.putExtra("photo", photoToSend);
+                    i.putExtra("photoWidth", photoWidthToSend);
+                }
                 i.putExtra("vicinity", restaurant.getVicinity());
                 i.putExtra("type", restaurant.getTypes().get(0));
                 i.putExtra("rate", rating);
@@ -195,6 +193,10 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
     private String parseDataPhotoToImage() {
 
+        String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
+        String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
+        String MAX_WIDTH = "maxwidth=";
+        String PHOTOREFERENCE = "&photoreference=";
         return new StringBuilder().append(PLACES_API_BASE).append(MAX_WIDTH).append(photoWidth)
                 .append(PHOTOREFERENCE).append(photoData).append(API_KEY).toString();
 

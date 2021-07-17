@@ -1,45 +1,45 @@
 package com.example.go4lunch;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.TypedValue;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
-import com.jakewharton.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
+import com.example.go4lunch.ui.restaurants_list.RestaurantsListAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RestaurantProfilActivity extends AppCompatActivity {
 
-    private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteText;
-    private List<String> weekDayText;
-    private Details mDetails;
+    private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
+    private List<String> weekDayList;
     private TextView nameText, typeText, vicinityText;
-    private ImageView restaurantPhoto, star2, star3;
+    private ImageView restaurantPhoto, star2, star3, callImage, websiteImage;
     private Context context;
     private final String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
     private String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
     private String MAX_WIDTH = "maxwidth=";
     private String PHOTOREFERENCE = "&photoreference=";
-    private FrameLayout viewCall;
+
+    private static final int REQUEST_CALL_PHONE_PERMISSION = 100;
 
 
     @Override
@@ -57,11 +57,11 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         restaurantPhoto = (ImageView) findViewById(R.id.restaurant_image);
         star2 = (ImageView) findViewById(R.id.restaurant_star_2);
         star3 = (ImageView) findViewById(R.id.restaurant_star_3);
-        viewCall = (FrameLayout) findViewById(R.id.view_call);
+        callImage = (ImageView) findViewById(R.id.call_image);
+        websiteImage = (ImageView) findViewById(R.id.website_image);
 
         recoveData();
         setFieldsWithData();
-
 
 
         Injection.provideRestaurantViewModel(this).getDetails(placeID)
@@ -70,29 +70,27 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     public void onChanged(Details details) {
                         // todo do something when clicking to call and website
                         //mDetails = details;
-                        phoneNum = details.getFormatted_phone_number();
-                        //phoneNum = RestaurantProfilActivity.this.details.getFormatted_phone_number();
-                        // websiteText = RestaurantProfilActivity.this.details.getWebsite();
-                        // weekDayText = RestaurantProfilActivity.this.details.getOpening_hours().getWeekday_text();
+                        if (details.getFormatted_phone_number() != null) {
+                            phoneNum = details.getFormatted_phone_number();
+                        }
+                        if (details.getWebsite() != null){
+                            websiteURL = details.getWebsite();
+                        }
+                        if (details.getOpening_hours().getWeekday_text() != null){
+                            weekDayList = details.getOpening_hours().getWeekday_text();
+                        }
                     }
                 });
 
-        viewCall.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                phoneNum = phoneNum.replaceAll("\\s+", "");
-                String stringPhoneNum = "tel:" + phoneNum;
-                Intent callIntent = new Intent(Intent.ACTION_CALL);
-                callIntent.setData(Uri.parse(stringPhoneNum));
-                startActivity(callIntent);
-                return true;
-            }
-        });
+
+        phoneRestaurant();
+        onClickWebsite(websiteURL);
+        sendWeekDayData();
+
 
         // todo   setResult() to send weekDay
 
     }
-
 
     private void recoveData() {
         Bundle i = getIntent().getExtras();
@@ -114,8 +112,12 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         }
         context = RestaurantProfilActivity.this;
 
-        Glide.with(context).load(parseDataPhotoToImage())
-                .into(restaurantPhoto);
+        if (photoReference == null){
+            Glide.with(context).load(R.drawable.restaurantjardin).into(restaurantPhoto);
+        }else {
+            Glide.with(context).load(parseDataPhotoToImage())
+                    .into(restaurantPhoto);
+        }
     }
 
     private void displayStarsRating() {
@@ -177,8 +179,85 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             nameText.setText(name);
     }
 
+    private void phoneRestaurant() {
+        callImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                phoneNum = phoneNum.replaceAll("\\s+", "");
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(RestaurantProfilActivity.this,
+                        android.Manifest.permission.CALL_PHONE)) {
+
+                    ActivityCompat.requestPermissions(RestaurantProfilActivity.this,
+                            new String[]{Manifest.permission.READ_PHONE_STATE},
+                            REQUEST_CALL_PHONE_PERMISSION);
+                } else {
+
+                    ActivityCompat.requestPermissions(RestaurantProfilActivity.this,
+                            new String[]{Manifest.permission.CALL_PHONE},
+                            REQUEST_CALL_PHONE_PERMISSION);
+                }
+            }
+        });
+    }
+
+
+    public void dialPhoneNumber(String phoneNumber) {
+        String shemePhoneNumber = "tel:" + phoneNumber;
+        Uri number = Uri.parse(shemePhoneNumber);
+        Intent callIntent = new Intent(Intent.ACTION_CALL, number);
+        if (callIntent.resolveActivity(getPackageManager()) != null) {
+            try {
+                startActivity(callIntent);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CALL_PHONE_PERMISSION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dialPhoneNumber(phoneNum);
+                } else {
+
+                }
+                return;
+            }
+        }
+    }
+
+    private void onClickWebsite(String url){
+        if (websiteURL != null) {
+            websiteImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openWebURL(url);
+                }
+            });
+        }else{
+            Toast.makeText(this, "This restaurant doesn't have a website", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void openWebURL(String url){
+        Intent browse = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browse);
+    }
+
+    private void sendWeekDayData(){
+        weekDayList = new ArrayList<String>();
+        Intent i = getIntent();
+        i.putStringArrayListExtra("weekDayList", (ArrayList<String>) weekDayList);
+        setResult(RESULT_OK, i);
+    }
+
 
 }
+
 
 
 

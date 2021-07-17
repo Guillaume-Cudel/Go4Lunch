@@ -281,7 +281,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public void requestLocationPermission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
+            //todo caution, remove comment after coding
+            //Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
         } else {
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
         }
@@ -314,14 +315,5 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         }
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
     }
-
-    /*public double getDoubleLongitude() {
-        return longitude;
-    }
-
-    public double getDoubleLatitude() {
-        return latitude;
-    }*/
-
 
 }

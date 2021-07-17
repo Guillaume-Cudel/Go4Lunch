@@ -8,8 +8,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class LocationViewModel extends ViewModel {
 
-    // todo see modify new MutableLiveData<LatLng>() to debug
-
    private final MutableLiveData<LatLng> _locationLiveData = new MutableLiveData<>();
    public LiveData<LatLng> locationLiveData = _locationLiveData;
 

@@ -1,5 +1,6 @@
 package com.example.go4lunch.ui.restaurants_list;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,16 +15,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.di.Injection;
+import com.example.go4lunch.model.Details;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.viewModel.LocationViewModel;
-import com.example.go4lunch.viewModel.RestaurantViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
 
 
 public class RestaurantsListFragment extends Fragment {
@@ -33,6 +35,7 @@ public class RestaurantsListFragment extends Fragment {
     private RecyclerView recyclerView;
     @NonNull
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
+    private Details mDetails;
     private LatLng mLatlng;
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
     private LocationViewModel locationViewModel;
@@ -46,7 +49,7 @@ public class RestaurantsListFragment extends Fragment {
         return (new RestaurantsListFragment());
     }
 
-    private void initViewModel(){
+    private void initRestaurantListViewModel(){
 
         locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
         locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
@@ -63,7 +66,7 @@ public class RestaurantsListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        initViewModel();
+        initRestaurantListViewModel();
 
         double latitude = mLatlng.latitude;
         double longitude = mLatlng.longitude;
@@ -80,6 +83,9 @@ public class RestaurantsListFragment extends Fragment {
             }
         });
 
+
+        // todo  faire une injection.blabla pour appel reseau du detail
+
         configureRecyclerView();
 
     }
@@ -94,7 +100,6 @@ public class RestaurantsListFragment extends Fragment {
         return view;
     }
 
-    // todo  add onActivityResult to recove weekDay text
 
 
     private void configureRecyclerView() {
@@ -113,4 +118,19 @@ public class RestaurantsListFragment extends Fragment {
         adapter.updateLocation(mLatlng);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RestaurantsListAdapter.REQUEST_RESTAURANTS_DETAILS && resultCode == RESULT_OK) {
+
+            // todo  suppress onActivityResult
+
+
+            // long id = data.getExtras().getLong(BUNDLE_EXTRA_ID);
+
+
+        }
+
+        }
 }
