@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.di.Injection;
+import com.example.go4lunch.repository.RestaurantRepository;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
@@ -35,6 +36,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,6 +50,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private ActivityNavigationBinding binding;
     private BottomNavigationView mBottomNavigationView;
     private LocationViewModel locationViewModel;
+    //private LocationListener listener = null;
 
 
     public Fragment fragmentMap;
@@ -66,6 +69,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public int getFragmentLayout() {
         return R.layout.activity_navigation;
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +229,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             startTransactionFragment(fragmentMap);
             return;
         }
+        //listener = (LocationListener) fragmentMap;
         startTransactionFragment(fragmentMap);
     }
 
@@ -234,6 +239,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             startTransactionFragment(fragmentRestaurantsList);
             return;
         }
+        //listener = (LocationListener) fragmentRestaurantsList;
         startTransactionFragment(fragmentRestaurantsList);
     }
 
@@ -304,6 +310,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                     if (location != null) {
 
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
+                        //listener.onLocationReady(new LatLng(location.getLatitude(), location.getLongitude()));
+
 
                     }
                 }
@@ -315,5 +323,9 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         }
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
     }
+
+    /*public interface LocationListener {
+        void onLocationReady(LatLng latLng);
+    }*/
 
 }

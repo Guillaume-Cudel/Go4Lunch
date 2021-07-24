@@ -1,6 +1,5 @@
 package com.example.go4lunch.ui.restaurants_list;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,8 +24,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.Activity.RESULT_OK;
-
 
 public class RestaurantsListFragment extends Fragment {
 
@@ -49,24 +46,11 @@ public class RestaurantsListFragment extends Fragment {
         return (new RestaurantsListFragment());
     }
 
-    private void initRestaurantListViewModel(){
-
-        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
-        locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
-            @Override
-            public void onChanged(LatLng latLng) {
-                mLatlng = latLng;
-                updateLocation();
-            }
-        });
-    }
-
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        initRestaurantListViewModel();
+        recoveLocation();
 
         double latitude = mLatlng.latitude;
         double longitude = mLatlng.longitude;
@@ -84,7 +68,7 @@ public class RestaurantsListFragment extends Fragment {
         });
 
 
-        // todo  faire une injection.blabla pour appel reseau du detail
+        // todo  faire une injection.blabla pour appel reseau du detail dans onChanged?
 
         configureRecyclerView();
 
@@ -98,6 +82,18 @@ public class RestaurantsListFragment extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_restaurant_list);
 
         return view;
+    }
+
+    private void recoveLocation(){
+
+        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
+        locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
+            @Override
+            public void onChanged(LatLng latLng) {
+                mLatlng = latLng;
+                updateLocation();
+            }
+        });
     }
 
 
@@ -118,19 +114,5 @@ public class RestaurantsListFragment extends Fragment {
         adapter.updateLocation(mLatlng);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RestaurantsListAdapter.REQUEST_RESTAURANTS_DETAILS && resultCode == RESULT_OK) {
-
-            // todo  suppress onActivityResult
-
-
-            // long id = data.getExtras().getLong(BUNDLE_EXTRA_ID);
-
-
-        }
-
-        }
 }

@@ -1,12 +1,14 @@
 package com.example.go4lunch;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -30,7 +32,6 @@ import java.util.List;
 public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
-    private List<String> weekDayList;
     private TextView nameText, typeText, vicinityText;
     private ImageView restaurantPhoto, star2, star3, callImage, websiteImage;
     private Context context;
@@ -68,27 +69,19 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 .observe(this, new Observer<Details>() {
                     @Override
                     public void onChanged(Details details) {
-                        // todo do something when clicking to call and website
                         //mDetails = details;
                         if (details.getFormatted_phone_number() != null) {
                             phoneNum = details.getFormatted_phone_number();
                         }
-                        if (details.getWebsite() != null){
+                        if (details.getWebsite() != null) {
                             websiteURL = details.getWebsite();
-                        }
-                        if (details.getOpening_hours().getWeekday_text() != null){
-                            weekDayList = details.getOpening_hours().getWeekday_text();
                         }
                     }
                 });
 
 
         phoneRestaurant();
-        onClickWebsite(websiteURL);
-        sendWeekDayData();
-
-
-        // todo   setResult() to send weekDay
+        onClickWebsite();
 
     }
 
@@ -112,9 +105,9 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         }
         context = RestaurantProfilActivity.this;
 
-        if (photoReference == null){
+        if (photoReference == null) {
             Glide.with(context).load(R.drawable.restaurantjardin).into(restaurantPhoto);
-        }else {
+        } else {
             Glide.with(context).load(parseDataPhotoToImage())
                     .into(restaurantPhoto);
         }
@@ -230,29 +223,30 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         }
     }
 
-    private void onClickWebsite(String url){
-        if (websiteURL != null) {
-            websiteImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    openWebURL(url);
+    private void onClickWebsite() {
+        websiteImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (websiteURL != null) {
+                    openWebURL(websiteURL);
+                } else {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(RestaurantProfilActivity.this);
+                    dialog.setTitle("This restaurant doesn't have a website");
+                    dialog.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    dialog.show();
                 }
-            });
-        }else{
-            Toast.makeText(this, "This restaurant doesn't have a website", Toast.LENGTH_SHORT).show();
-        }
+            }
+        });
     }
 
-    private void openWebURL(String url){
+    private void openWebURL(String url) {
         Intent browse = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browse);
-    }
-
-    private void sendWeekDayData(){
-        weekDayList = new ArrayList<String>();
-        Intent i = getIntent();
-        i.putStringArrayListExtra("weekDayList", (ArrayList<String>) weekDayList);
-        setResult(RESULT_OK, i);
     }
 
 

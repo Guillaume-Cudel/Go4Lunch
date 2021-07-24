@@ -39,7 +39,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
     private List<Restaurant> dataList;
     private Context context;
-    public static final int REQUEST_RESTAURANTS_DETAILS = 42;
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
     private LatLng mlatlng;
 
@@ -126,7 +125,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
                 i.putExtra("vicinity", restaurant.getVicinity());
                 i.putExtra("type", restaurant.getTypes().get(0));
                 i.putExtra("rate", rating);
-                ((Activity) context).startActivityForResult(i, REQUEST_RESTAURANTS_DETAILS);
+                ((Activity) context).startActivity(i);
 
             }
         });
