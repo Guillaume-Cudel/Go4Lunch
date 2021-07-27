@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.text.InputFilter;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,26 +15,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.RestaurantProfilActivity;
-import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.requests.Photos;
-import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.maps.model.LatLng;
-import com.jakewharton.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
 
-import java.io.Serializable;
+import java.util.Calendar;
 import java.util.List;
 
 public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsListAdapter.RestaurantsListViewHolder> {
@@ -41,6 +33,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     private Context context;
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
     private LatLng mlatlng;
+    private Restaurant restaurant;
 
 
     public RestaurantsListAdapter(final List<Restaurant> dataList, LatLng latlng, Context context) {
@@ -59,19 +52,22 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     @Override
     public void onBindViewHolder(RestaurantsListViewHolder holder, int position) {
 
-        Restaurant restaurant = dataList.get(holder.getAdapterPosition());
+        restaurant = dataList.get(holder.getAdapterPosition());
         String placeID = restaurant.getPlace_id();
         rating = restaurant.getRating();
         restaurantLatitude = restaurant.getGeometry().getLocation().getLat();
         restaurantLongitude = restaurant.getGeometry().getLocation().getLng();
 
 
-        holder.nameField.setText(restaurant.getName());
+        //holder.nameField.setText(restaurant.getName());
+        displayRestaurantName(restaurant.getName(), holder.nameField);
 
         if (restaurant.getVicinity() != null) {
-            holder.addressField.setText(restaurant.getVicinity());
+            //holder.addressField.setText(restaurant.getVicinity());
+            displayRestaurantVicinity(restaurant.getVicinity(), holder.addressField);
         }
 
+        // todo adapt type with vicinity
         if (restaurant.getTypes() != null) {
             holder.kindField.setText(restaurant.getTypes().get(0));
         }
@@ -87,6 +83,11 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
                 holder.informationField.setText(close);
                 holder.informationField.setTypeface(null, Typeface.BOLD);
                 holder.informationField.setTextColor(Color.RED);
+            }
+            if (restaurant.getDetails() != null) {
+                String text = displayOpeningTime(restaurant);
+                displayRestaurantText(text, holder.openingTime);
+                //holder.openingTime.setText(displayOpeningTime(restaurant));
             }
         }
 
@@ -160,6 +161,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         private final TextView kindField;
         private final TextView addressField;
         private final TextView informationField;
+        private final TextView openingTime;
         private final TextView distanceField;
         private final ImageView noteField2;
         private final ImageView noteField3;
@@ -173,6 +175,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             kindField = mView.findViewById(R.id.list_view_kind_restaurant);
             addressField = mView.findViewById(R.id.list_view_address);
             informationField = mView.findViewById(R.id.list_view_informations);
+            openingTime = mView.findViewById(R.id.list_view_opening_time);
             distanceField = mView.findViewById(R.id.list_view_distance);
             noteField2 = mView.findViewById(R.id.list_view_star_2);
             noteField3 = mView.findViewById(R.id.list_view_star_3);
@@ -224,6 +227,107 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         String distance = String.valueOf(distanceRound);
 
         return distance;
+    }
+
+
+    private String displayOpeningTime(Restaurant restaurant) {
+        List<String> weekdayText = restaurant.getDetails().getOpening_hours().getWeekday_text();
+        String dayOpening = null;
+
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.MONDAY:
+                dayOpening = weekdayText.get(0);
+                break;
+            case Calendar.TUESDAY:
+                dayOpening = weekdayText.get(1);
+                break;
+            case Calendar.WEDNESDAY:
+                dayOpening = weekdayText.get(2);
+                break;
+            case Calendar.THURSDAY:
+                dayOpening = weekdayText.get(3);
+                break;
+            case Calendar.FRIDAY:
+                dayOpening = weekdayText.get(4);
+                break;
+            case Calendar.SATURDAY:
+                dayOpening = weekdayText.get(5);
+                break;
+            case Calendar.SUNDAY:
+                dayOpening = weekdayText.get(6);
+                break;
+        }
+
+        return dayOpening;
+    }
+
+    private int countCharacter(String word) {
+        String string = word;
+        int count = 0;
+
+        //Counts each character except space
+        for (int i = 0; i < string.length(); i++) {
+            if (string.charAt(i) != ' ')
+                count++;
+        }
+        return count;
+    }
+
+    private void displayRestaurantText(String text, TextView textView) {
+        int numberOfCharacter = countCharacter(text);
+        if (numberOfCharacter > 30 && numberOfCharacter <= 35) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 35 && numberOfCharacter <= 40) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 8);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 40) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 7);
+            textView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(60)});
+            textView.setText(text);
+        } else
+            textView.setText(text);
+    }
+
+    private void displayRestaurantName(String text, TextView textView) {
+        int numberOfCharacter = countCharacter(text);
+        if (numberOfCharacter > 15 && numberOfCharacter <= 25) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 25 && numberOfCharacter <= 30) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 30) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            textView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(36)});
+            textView.setText(text);
+        }else
+            textView.setText(text);
+    }
+
+    private void displayRestaurantVicinity(String text, TextView textView) {
+        int numberOfCharacter = countCharacter(text);
+        if (numberOfCharacter > 30 && numberOfCharacter <= 35) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 35 && numberOfCharacter <= 40) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 8);
+            textView.setText(text);
+        }
+        if (numberOfCharacter > 40) {
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 7);
+            textView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(45)});
+            textView.setText(text);
+        } else
+            textView.setText(text);
     }
 
 }

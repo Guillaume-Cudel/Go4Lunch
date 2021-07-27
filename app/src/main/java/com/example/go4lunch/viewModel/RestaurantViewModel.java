@@ -70,5 +70,9 @@ public class RestaurantViewModel extends ViewModel {
             }
         });
     }
+
+    public MutableLiveData<Details> getDetailsLiveData() {
+        return detailsLiveData;
+    }
 }
 

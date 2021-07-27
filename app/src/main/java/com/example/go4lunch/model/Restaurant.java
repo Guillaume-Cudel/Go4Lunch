@@ -32,10 +32,10 @@ public class Restaurant {
     @SerializedName("types")
     @Expose
     private List<String> types;
-
     @SerializedName("place_id")
     @Expose
     private String place_id;
+    private Details details;
 
 
     public Restaurant(String name, String vicinity, OpeningHours opening_hours, Geometry geometry,
@@ -80,5 +80,13 @@ public class Restaurant {
 
     public String getPlace_id() {
         return place_id;
+    }
+
+    public Details getDetails() {
+        return details;
+    }
+
+    public void setDetails(Details details) {
+        this.details = details;
     }
 }

@@ -23,8 +23,7 @@
         app:layout_constraintTop_toTopOf="@id/list_view_image"
         android:layout_marginStart="@dimen/ten"
         android:text="Restaurant name"
-        android:textSize="15sp"
-        android:maxLength="25"
+        android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="@color/black"/>
 
@@ -43,9 +42,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@+id/list_view_kind_restaurant"
+        app:layout_constraintTop_toTopOf="@+id/list_view_kind_restaurant"
         app:layout_constraintBottom_toBottomOf="@id/list_view_kind_restaurant"
-        android:layout_marginStart="@dimen/five"
-        android:text=" - "
+        android:layout_marginStart="1dp"
+        android:text="-"
         android:textSize="12sp"/>
 
     <TextView
@@ -53,11 +53,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@id/list_view_space"
+        app:layout_constraintTop_toTopOf="@+id/list_view_kind_restaurant"
         app:layout_constraintBottom_toBottomOf="@id/list_view_kind_restaurant"
-        android:layout_marginStart="@dimen/five"
+        android:layout_marginStart="1dp"
         android:text="5 rue des marguerites"
-        android:textSize="10sp"
-        android:maxLength="30"/>
+        android:textSize="10sp" />
 
     <TextView
         android:id="@+id/list_view_informations"
@@ -67,6 +67,18 @@
         app:layout_constraintTop_toBottomOf="@id/list_view_kind_restaurant"
         android:layout_marginTop="@dimen/five"
         android:text="No opening information"
+        android:textSize="10sp"
+        android:textStyle="italic"/>
+
+    <TextView
+        android:id="@+id/list_view_opening_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/list_view_informations"
+        app:layout_constraintBottom_toBottomOf="@+id/list_view_informations"
+        app:layout_constraintTop_toTopOf="@+id/list_view_informations"
+        android:layout_marginStart="@dimen/five"
+        android:textSize="10sp"
         android:textStyle="italic"/>
 
     <TextView
