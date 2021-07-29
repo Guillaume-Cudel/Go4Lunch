@@ -32,7 +32,6 @@ public class RestaurantsListFragment extends Fragment {
     private RecyclerView recyclerView;
     @NonNull
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
-    private Details mDetails;
     private LatLng mLatlng;
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
     private LocationViewModel locationViewModel;

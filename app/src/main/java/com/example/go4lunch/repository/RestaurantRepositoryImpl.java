@@ -19,7 +19,6 @@ public class RestaurantRepositoryImpl implements RestaurantRepository {
     private final ApiService apiService;
     private static final String FIELDS = "formatted_phone_number,opening_hours,website";
     private static final String API_KEY = "AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
-    RestaurantViewModel restaurantViewModel;
 
     public RestaurantRepositoryImpl(ApiService apiService){
         this.apiService = apiService;

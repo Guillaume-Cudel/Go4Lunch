@@ -33,7 +33,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
     private TextView nameText, typeText, vicinityText;
-    private ImageView restaurantPhoto, star2, star3, callImage, websiteImage;
+    private ImageView restaurantPhoto,star1, star2, star3, callImage, websiteImage;
     private Context context;
     private final String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
     private String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
@@ -56,6 +56,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         typeText = (TextView) findViewById(R.id.restaurant_kind);
         vicinityText = (TextView) findViewById(R.id.restaurant_address);
         restaurantPhoto = (ImageView) findViewById(R.id.restaurant_image);
+        star1 = (ImageView) findViewById(R.id.restaurant_star_1);
         star2 = (ImageView) findViewById(R.id.restaurant_star_2);
         star3 = (ImageView) findViewById(R.id.restaurant_star_3);
         callImage = (ImageView) findViewById(R.id.call_image);
@@ -98,12 +99,14 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private void setFieldsWithData() {
         displayRestaurantName();
+        context = RestaurantProfilActivity.this;
         typeText.setText(type);
         vicinityText.setText(vicinity);
         if (rating != null) {
             displayStarsRating();
+        }else{
+            noDisplayStars();
         }
-        context = RestaurantProfilActivity.this;
 
         if (photoReference == null) {
             Glide.with(context).load(R.drawable.restaurantjardin).into(restaurantPhoto);
@@ -122,6 +125,12 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         if (dRating > 1.67 && dRating < 3.4) {
             star3.setVisibility(View.INVISIBLE);
         }
+    }
+
+    private void noDisplayStars(){
+        star1.setVisibility(View.INVISIBLE);
+        star2.setVisibility(View.INVISIBLE);
+        star3.setVisibility(View.INVISIBLE);
     }
 
     private String parseDataPhotoToImage() {

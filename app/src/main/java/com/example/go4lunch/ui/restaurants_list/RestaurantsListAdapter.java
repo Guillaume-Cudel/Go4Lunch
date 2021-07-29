@@ -30,7 +30,7 @@ import java.util.List;
 public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsListAdapter.RestaurantsListViewHolder> {
 
     private List<Restaurant> dataList;
-    private Context context;
+    private final Context context;
     private String photoData, photoWidth, rating, restaurantLatitude, restaurantLongitude;
     private LatLng mlatlng;
     private Restaurant restaurant;
@@ -58,12 +58,9 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         restaurantLatitude = restaurant.getGeometry().getLocation().getLat();
         restaurantLongitude = restaurant.getGeometry().getLocation().getLng();
 
-
-        //holder.nameField.setText(restaurant.getName());
         displayRestaurantName(restaurant.getName(), holder.nameField);
 
         if (restaurant.getVicinity() != null) {
-            //holder.addressField.setText(restaurant.getVicinity());
             displayRestaurantVicinity(restaurant.getVicinity(), holder.addressField);
         }
 
@@ -87,12 +84,13 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             if (restaurant.getDetails() != null) {
                 String text = displayOpeningTime(restaurant);
                 displayRestaurantText(text, holder.openingTime);
-                //holder.openingTime.setText(displayOpeningTime(restaurant));
             }
         }
 
         if (restaurant.getRating() != null) {
             holder.displayStarsRating();
+        }else{
+            holder.noDisplayStars();
         }
 
         String distance = getDistanceInMeters() + " m";
@@ -163,6 +161,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         private final TextView informationField;
         private final TextView openingTime;
         private final TextView distanceField;
+        private final ImageView noteField1;
         private final ImageView noteField2;
         private final ImageView noteField3;
 
@@ -177,6 +176,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             informationField = mView.findViewById(R.id.list_view_informations);
             openingTime = mView.findViewById(R.id.list_view_opening_time);
             distanceField = mView.findViewById(R.id.list_view_distance);
+            noteField1 = mView.findViewById(R.id.list_view_star_1);
             noteField2 = mView.findViewById(R.id.list_view_star_2);
             noteField3 = mView.findViewById(R.id.list_view_star_3);
         }
@@ -191,7 +191,15 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
                 noteField3.setVisibility(View.INVISIBLE);
             }
         }
+
+        private void noDisplayStars(){
+            noteField1.setVisibility(View.INVISIBLE);
+            noteField2.setVisibility(View.INVISIBLE);
+            noteField3.setVisibility(View.INVISIBLE);
+        }
     }
+
+
 
     private String parseDataPhotoToImage() {
 
