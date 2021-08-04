@@ -30,14 +30,18 @@ import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
 import com.example.go4lunch.ui.workmates.WorkmatesFragment;
 import com.example.go4lunch.viewModel.LocationViewModel;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -95,7 +99,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         updateUIWhenCreating();
         onClickItemsDrawer();
-        createRequestLocation();
+        //createRequestLocation();
+        getLastLocation();
 
     }
 
@@ -259,12 +264,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         requestLocationPermission();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        createRequestLocation();
-    }
-
     // Location
 
     // Configure EASY location request
@@ -280,18 +279,17 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public void requestLocationPermission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            //todo caution, remove comment after coding
             //Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
         } else {
             EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
         }
     }
 
+    // Get and update location with interval. Use it to get location in mooving
     public void createRequestLocation() {
-
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setInterval(60000);
-        locationRequest.setFastestInterval(20000);
+        locationRequest.setFastestInterval(90000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationCallback locationCallback = new LocationCallback() {
             @Override
@@ -302,7 +300,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
-                    }
+                      }
                 }
             }
         };
@@ -311,5 +309,28 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             return;
         }
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
+    }
+
+    public void getLastLocation(){
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION_PERMISSION);
+            return;
+        }
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
+                }
+            }
+        });
+
+
     }
 }

@@ -93,7 +93,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/restaurant_kind"
         android:layout_marginStart="@dimen/five"
         android:text="5 rue des marguerites"
-        android:maxLength="35"
+        android:maxLength="40"
         android:textColor="@color/white"
         android:textSize="12sp"/>
 

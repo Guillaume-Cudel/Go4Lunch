@@ -7,15 +7,23 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +39,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -49,7 +59,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private LatLng mLatlng;
     private SupportMapFragment mapFragment;
     private GoogleMap map;
-    private Context context;
     private List<Restaurant> restaurantsList = new ArrayList<>();
 
 
@@ -78,18 +87,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     }
 
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
-        //LatLng pos = new LatLng(43.5897, 1.3978);
-        //43.5762004,1.3856668
-        //43.6536576,1.4419125
 
         // set maximal and minimal zoom
         map.setMinZoomPreference(10.0f);
-        map.setMaxZoomPreference(15.0f);
+        map.setMaxZoomPreference(18.0f);
 
         LatLngBounds toulouseBounds = new LatLngBounds(
                 new LatLng(43.3, 1.3), // SW bounds
@@ -97,6 +104,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         );
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(toulouseBounds.getCenter(), 12));
 
+
+        if (mLatlng != null){
+            plotBlueDot();
+            recoveAndMarkRestaurants();
+        }
 
         // filter my position
         if (ActivityCompat.checkSelfPermission(getContext(),
@@ -108,10 +120,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         map.setMyLocationEnabled(true);
         map.setOnMyLocationButtonClickListener(this);
         map.setOnInfoWindowClickListener(this);
-
-        /*MarkerInfoWindowAdapter markerInfoWindowAdapter = new MarkerInfoWindowAdapter(getContext());
-        googleMap.setInfoWindowAdapter(markerInfoWindowAdapter);*/
-
     }
 
     private void initLocationviewModel() {
@@ -122,7 +130,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 mLatlng = latLng;
                 plotBlueDot();
                 recoveAndMarkRestaurants();
-
             }
         });
     }
@@ -155,10 +162,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             }else
                                 infoRate = "No rating";
 
+                            Bitmap bitmap = getBitmapFromVectorDrawable(getContext(),R.drawable.ic_restaurant_red);
+                            BitmapDescriptor descriptor =BitmapDescriptorFactory.fromBitmap(bitmap);
+
                             Marker restaurantMarker = map.addMarker(new MarkerOptions()
                                     .position(restaurantLocation)
                                     .title(title)
                                     .snippet(infoRate)
+                                    // todo set up the icon
+                                    .icon(descriptor)
                             );
                             restaurantMarker.setTag(restaurant);
                         }
@@ -215,6 +227,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
             i.putExtra("rate", rating);
             getActivity().startActivity(i);
         }
+    }
 
+    /*private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_baseline_place_red);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
+        vectorDrawable.setBounds(20, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
+        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }*/
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable =  AppCompatResources.getDrawable(context, drawableId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }
