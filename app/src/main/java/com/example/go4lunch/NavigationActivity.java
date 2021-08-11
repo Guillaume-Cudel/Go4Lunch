@@ -9,6 +9,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -100,7 +102,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         updateUIWhenCreating();
         onClickItemsDrawer();
         //createRequestLocation();
-        getLastLocation();
+        //getLastLocation();
 
     }
 
@@ -272,6 +274,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Forward results to EasyPermissions
+        // todo see easy permission if location is according
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
@@ -279,40 +282,29 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public void requestLocationPermission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            //Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
-        } else {
-            EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
-        }
-    }
+            ProgressDialog loading = ProgressDialog.show(this, "", "Loading", true);
 
-    // Get and update location with interval. Use it to get location in mooving
-    public void createRequestLocation() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setInterval(60000);
-        locationRequest.setFastestInterval(90000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        LocationCallback locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
-                for (Location location : locationResult.getLocations()) {
+            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
                     if (location != null) {
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
-                      }
+                        loading.cancel();
+                    }
                 }
-            }
-        };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
+            });
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.locationNotGranted), REQUEST_LOCATION_PERMISSION, perms);
         }
-        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
     }
 
     public void getLastLocation(){
 
+        // todo pas utile
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -321,12 +313,16 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             return;
         }
 
+        ProgressDialog loading = ProgressDialog.show(this, "", "Loading", true);
+
+
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
                     locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
+                    loading.cancel();
                 }
             }
         });

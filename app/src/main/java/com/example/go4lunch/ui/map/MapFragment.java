@@ -3,6 +3,7 @@ package com.example.go4lunch.ui.map;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -55,7 +56,6 @@ import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnInfoWindowClickListener {
 
-    private LocationViewModel locationViewModel;
     private LatLng mLatlng;
     private SupportMapFragment mapFragment;
     private GoogleMap map;
@@ -123,7 +123,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     }
 
     private void initLocationviewModel() {
-        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
+
+        LocationViewModel locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
         locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
             @Override
             public void onChanged(LatLng latLng) {
@@ -169,7 +170,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                     .position(restaurantLocation)
                                     .title(title)
                                     .snippet(infoRate)
-                                    // todo set up the icon
                                     .icon(descriptor)
                             );
                             restaurantMarker.setTag(restaurant);
@@ -229,18 +229,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         }
     }
 
-    /*private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
-        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_baseline_place_red);
-        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
-        vectorDrawable.setBounds(20, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
-        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        background.draw(canvas);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }*/
-
+    // Convert vector drawable to bitmap for get personalized marker icon
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
         Drawable drawable =  AppCompatResources.getDrawable(context, drawableId);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {

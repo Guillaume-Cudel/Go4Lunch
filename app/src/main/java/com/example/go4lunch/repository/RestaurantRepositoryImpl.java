@@ -46,8 +46,6 @@ public class RestaurantRepositoryImpl implements RestaurantRepository {
                         }
                     });
                 }
-
-
             }
 
             @Override

@@ -64,7 +64,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             displayRestaurantVicinity(restaurant.getVicinity(), holder.addressField);
         }
 
-        // todo adapt type with vicinity
         if (restaurant.getTypes() != null) {
             holder.kindField.setText(restaurant.getTypes().get(0));
         }

@@ -65,10 +65,6 @@ public class RestaurantsListFragment extends Fragment {
                 updateRestaurants();
             }
         });
-
-
-        // todo  faire une injection.blabla pour appel reseau du detail dans onChanged?
-
         configureRecyclerView();
 
     }
