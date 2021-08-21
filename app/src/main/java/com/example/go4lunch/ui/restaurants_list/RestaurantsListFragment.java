@@ -34,8 +34,6 @@ public class RestaurantsListFragment extends Fragment {
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
     private LatLng mLatlng;
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
-    private LocationViewModel locationViewModel;
-
 
 
     public RestaurantsListFragment( ) {
@@ -50,6 +48,7 @@ public class RestaurantsListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         recoveLocation();
+
 
         double latitude = mLatlng.latitude;
         double longitude = mLatlng.longitude;
@@ -81,7 +80,7 @@ public class RestaurantsListFragment extends Fragment {
 
     private void recoveLocation(){
 
-        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
+        LocationViewModel locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
         locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
             @Override
             public void onChanged(LatLng latLng) {

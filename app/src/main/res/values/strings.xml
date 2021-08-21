@@ -25,5 +25,6 @@
     <string name="log_out">Log out</string>
     <string name="logo_text">Find a nice restaurant and invite your co-worker to lunch !</string>
     <string name="locationNotGranted">Please grant the location permission</string>
+    <string name="error_unknown_error"> A unknow error has appeared</string>
 
 </resources>

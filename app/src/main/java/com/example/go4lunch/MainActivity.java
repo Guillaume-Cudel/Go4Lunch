@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.go4lunch.databinding.ActivityMainBinding;
+import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.ui.BaseActivity;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -110,8 +111,9 @@ public class MainActivity extends BaseActivity {
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        //FirebaseUser currentUser = mAuth.getCurrentUser();
+        //updateUI(currentUser);
+        updateUI();
     }
 
     // AUTHENTIFICATION
@@ -184,12 +186,15 @@ public class MainActivity extends BaseActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
+                            // todo add user to firestore
+                            createUserInFirestore();
+                            //updateUI(user);
+                            updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             showSnackBar(binding.mainActivityLayout, getString(R.string.error));
-                            updateUI(null);
+                            //updateUI(null);
                         }
                     }
                 });
@@ -205,18 +210,28 @@ public class MainActivity extends BaseActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
+                            // todo add user to firestore
+                            createUserInFirestore();
+                            //updateUI(user);
+                            updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            updateUI(null);
+                            //updateUI(null);
+                            updateUI();
                         }
                     }
                 });
     }
 
-    public void updateUI(FirebaseUser account) {
+    /*public void updateUI(FirebaseUser account) {
         if (account != null) {
+            startNavigationActivity();
+        }
+    }*/
+
+    private void updateUI(){
+        if (isCurrentUserLogged()){
             startNavigationActivity();
         }
     }
@@ -234,4 +249,15 @@ public class MainActivity extends BaseActivity {
     // REST REQUEST
     // --------------------
 
+    private void createUserInFirestore(){
+
+        if (this.getCurrentUser() != null){
+
+            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
+            String username = this.getCurrentUser().getDisplayName();
+            String uid = this.getCurrentUser().getUid();
+
+            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+        }
+    }
 }

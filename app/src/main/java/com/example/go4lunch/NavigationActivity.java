@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -44,6 +45,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
+import java.text.NumberFormat;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -53,6 +56,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private ActivityNavigationBinding binding;
     private BottomNavigationView mBottomNavigationView;
     private LocationViewModel locationViewModel;
+    private LocationCallback locationCallback;
 
     public Fragment fragmentMap;
     public Fragment fragmentRestaurantsList;
@@ -83,7 +87,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         locationViewModel = Injection.provideLocationViewModel(this);
 
-
         // Show the first fragment when starting activity
         fragmentMap = new MapFragment();
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -101,8 +104,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         updateUIWhenCreating();
         onClickItemsDrawer();
-        //createRequestLocation();
-        //getLastLocation();
+
 
     }
 
@@ -274,7 +276,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         // Forward results to EasyPermissions
-        // todo see easy permission if location is according
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
@@ -282,7 +283,30 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     public void requestLocationPermission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            ProgressDialog loading = ProgressDialog.show(this, "", "Loading", true);
+
+            ProgressDialog loading = ProgressDialog.show(this, "", "Recoving location", true);
+
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setInterval(10000);
+            locationRequest.setFastestInterval(2000);
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(@NonNull LocationResult locationResult) {
+                    if (locationResult == null) {
+                        /*AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
+                        builder.setTitle("No location found.").setMessage("Please check your location's settings.");
+                        AlertDialog dialog = builder.create();
+                        dialog.show();*/
+                        return;
+                    }
+                    for (Location location : locationResult.getLocations()) {
+                        if (location != null) {
+                            locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
+                        }
+                    }
+                }
+            };
 
             FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -291,9 +315,14 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
+                    if (location == null) {
+                        startLocationUpdates(locationRequest, locationCallback);
+                        loading.cancel();
+                    }
                     if (location != null) {
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
                         loading.cancel();
+                        stopLocationUpdates(locationCallback);
                     }
                 }
             });
@@ -302,31 +331,16 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         }
     }
 
-    public void getLastLocation(){
-
-        // todo pas utile
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION_PERMISSION);
+    private void startLocationUpdates(LocationRequest locationRequest, LocationCallback locationCallback) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, null);
+    }
 
-        ProgressDialog loading = ProgressDialog.show(this, "", "Loading", true);
-
-
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
-                    loading.cancel();
-                }
-            }
-        });
-
+    private void stopLocationUpdates(LocationCallback locationCallback) {
+        LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
 
     }
+
 }

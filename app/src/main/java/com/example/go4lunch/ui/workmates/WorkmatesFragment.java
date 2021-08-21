@@ -19,10 +19,6 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class WorkmatesFragment extends Fragment {
 
-    private LocationViewModel locationViewModel;
-    private LatLng mLatlng;
-    private String locationText;
-
 
     public WorkmatesFragment(){}
 
@@ -30,30 +26,11 @@ public class WorkmatesFragment extends Fragment {
         return (new WorkmatesFragment());
     }
 
-    private void initLocationviewModel(){
-        locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
-        locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
-            @Override
-            public void onChanged(LatLng latLng) {
-                mLatlng = latLng;
-                double latitude = mLatlng.latitude;
-                double longitude = mLatlng.longitude;
-                locationText = latitude + "," + longitude;
 
-            }
-        });
-    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
-
-        TextView showLocation = (TextView) view.findViewById(R.id.show_location);
-
-        initLocationviewModel();
-
-        showLocation.setText(locationText);
-        Log.d("localisation", locationText);
 
         return view;
 

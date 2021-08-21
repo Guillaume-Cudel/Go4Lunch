@@ -144,7 +144,11 @@ public class RestaurantProfilActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                //finish();
+                Intent i = new Intent(this, NavigationActivity.class);
+                //i.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(i);
                 return true;
         }
         return super.onOptionsItemSelected(item);
