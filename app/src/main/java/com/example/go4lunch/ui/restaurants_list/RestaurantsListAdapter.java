@@ -105,7 +105,6 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
                     .into(holder.imageField);
         }else{
             Glide.with(context).load(R.drawable.restaurantjardin).into(holder.imageField);
-
         }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

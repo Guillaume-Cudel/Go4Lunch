@@ -6,9 +6,13 @@ public class UserFirebase {
 
     private String uid;
     private String username;
-    private Boolean isChoosed;
+    private Boolean haveChoosed;
     @Nullable
     private String urlPicture;
+    private String restaurantChoosed;
+
+
+
 
     public UserFirebase() { }
 
@@ -16,7 +20,7 @@ public class UserFirebase {
         this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;
-        this.isChoosed = false;
+        this.haveChoosed = false;
     }
 
     // --- GETTERS ---
@@ -24,11 +28,13 @@ public class UserFirebase {
     public String getUsername() { return username; }
     @Nullable
     public String getUrlPicture() { return urlPicture; }
-    public Boolean getIsChoosed() { return isChoosed; }
+    public Boolean getHaveChoosed() { return haveChoosed; }
+    public String getRestaurantChoosed() { return restaurantChoosed;
+    }
 
     // --- SETTERS ---
-    public void setUsername(String username) { this.username = username; }
-    public void setUid(String uid) { this.uid = uid; }
-    public void setUrlPicture(@Nullable String urlPicture) { this.urlPicture = urlPicture; }
-    public void setIsChoosed(Boolean mentor) { isChoosed = mentor; }
+    public void setHaveChoosed(Boolean mentor) { haveChoosed = mentor; }
+    public void setRestaurantChoosed(String restaurantChoosed) { this.restaurantChoosed = restaurantChoosed;
+    }
+
 }
