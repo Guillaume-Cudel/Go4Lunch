@@ -215,12 +215,14 @@
         android:textColor="@color/orange"/>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/profil_restaurant_recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/view_call"
         app:layout_constraintStart_toStartOf="parent"
-
-
+        android:name="com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:context="ui.restaurant_profil.RestaurantProfilActivity"
         tools:listitem="@layout/item_workmate"/>
 
 

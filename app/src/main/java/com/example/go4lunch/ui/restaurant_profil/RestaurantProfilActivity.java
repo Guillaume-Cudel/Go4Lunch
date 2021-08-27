@@ -1,10 +1,12 @@
-package com.example.go4lunch;
+package com.example.go4lunch.ui.restaurant_profil;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -19,12 +21,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.go4lunch.NavigationActivity;
+import com.example.go4lunch.R;
+import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
-import com.example.go4lunch.ui.restaurants_list.RestaurantsListAdapter;
+import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.ui.workmates.WorkmatesAdapter;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +46,15 @@ public class RestaurantProfilActivity extends AppCompatActivity {
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
     private TextView nameText, typeText, vicinityText;
     private ImageView restaurantPhoto,star1, star2, star3, callImage, websiteImage;
+    private FloatingActionButton choosedButton;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+    private String userUid = currentUser.getUid();
+    @NonNull
+    private final ArrayList<UserFirebase> participantslist = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private RestaurantProfilAdapter adapter = new RestaurantProfilAdapter(participantslist, this);
     private Context context;
-    private final String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
-    private String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
-    private String MAX_WIDTH = "maxwidth=";
-    private String PHOTOREFERENCE = "&photoreference=";
 
     private static final int REQUEST_CALL_PHONE_PERMISSION = 100;
 
@@ -61,10 +77,11 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         star3 = (ImageView) findViewById(R.id.restaurant_star_3);
         callImage = (ImageView) findViewById(R.id.call_image);
         websiteImage = (ImageView) findViewById(R.id.website_image);
+        choosedButton = (FloatingActionButton) findViewById(R.id.restaurant_choice_button);
+        recyclerView = (RecyclerView) findViewById(R.id.profil_restaurant_recyclerView);
 
         recoveData();
         setFieldsWithData();
-
 
         Injection.provideRestaurantViewModel(this).getDetails(placeID)
                 .observe(this, new Observer<Details>() {
@@ -83,7 +100,49 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
         phoneRestaurant();
         onClickWebsite();
+        onClickChoosedButton();
 
+    }
+
+    // todo think to suppress and add the new user to get restaurantChoosed into firestore
+    private void onClickChoosedButton(){
+        choosedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChoosed;
+
+                if (isChoosed = false) {
+                    UserHelper.updateIsChoosed(userUid, true);
+                    UserHelper.updateRestaurantChoosed(userUid, placeID);
+                    UserHelper.updateRestaurantName(userUid, name);
+                    updateList(isChoosed);
+                    isChoosed = true;
+                }else{
+                    UserHelper.updateIsChoosed(userUid, false);
+                    UserHelper.deleteRestaurantChoosed(userUid);
+                    UserHelper.deleteRestaurantname(userUid);
+                    updateList(isChoosed);
+                    isChoosed = false;
+                }
+            }
+        });
+    }
+
+    private void updateList(boolean isChoosed){
+        DocumentReference document = UserHelper.getUsersCollection().document(userUid);
+        document.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                UserFirebase retrieveUser = documentSnapshot.toObject(UserFirebase.class);
+                if(!isChoosed) {
+                    participantslist.add(retrieveUser);
+                }else {
+                    participantslist.remove(retrieveUser);
+                }
+                adapter = new RestaurantProfilAdapter(participantslist, context);
+                recyclerView.setAdapter(adapter);
+            }
+        });
     }
 
     private void recoveData() {
@@ -135,6 +194,10 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String parseDataPhotoToImage() {
 
+        String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
+        String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
+        String MAX_WIDTH = "maxwidth=";
+        String PHOTOREFERENCE = "&photoreference=";
         return new StringBuilder().append(PLACES_API_BASE).append(MAX_WIDTH).append(photoWidth)
                 .append(PHOTOREFERENCE).append(photoReference).append(API_KEY).toString();
 

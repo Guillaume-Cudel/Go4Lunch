@@ -1,4 +1,4 @@
-package com.example.go4lunch.ui.workmates;
+package com.example.go4lunch.ui.restaurant_profil;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,32 +14,36 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.ui.workmates.WorkmatesAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.WorkmatesViewHolder> {
+public class RestaurantProfilAdapter extends RecyclerView.Adapter<RestaurantProfilAdapter.RestaurantProfilViewHolder> {
 
-    private List<UserFirebase> workmatesList;
+    private List<UserFirebase> participantsList = new ArrayList<>();
     private final Context context;
 
-    public WorkmatesAdapter(final List<UserFirebase> workmatesList, Context context) {
-        this.workmatesList = workmatesList;
+    public RestaurantProfilAdapter(final List<UserFirebase> list, Context context){
+        this.participantsList = list;
         this.context = context;
     }
 
-    @NotNull
+
+    @NonNull
     @Override
-    public WorkmatesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public RestaurantProfilAdapter.RestaurantProfilViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_workmate, parent, false);
-        return new WorkmatesViewHolder(view);
+        return new RestaurantProfilViewHolder(view);
     }
 
-    @Override
-    public void onBindViewHolder(@NotNull WorkmatesViewHolder holder, int position) {
 
-        UserFirebase user = workmatesList.get(holder.getAdapterPosition());
+    @Override
+    public void onBindViewHolder(@NonNull RestaurantProfilAdapter.RestaurantProfilViewHolder holder, int position) {
+
+        UserFirebase user = participantsList.get(holder.getAdapterPosition());
 
         String photo = user.getUrlPicture();
         if (photo != null){
@@ -53,32 +57,19 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
         }
 
         String username = user.getUsername();
-        /*String restaurantLess = username + " hasn't decided yet.";
-        holder.usernameText.setText(restaurantLess);*/
-
-        boolean choosed = user.getHaveChoosed();
-        if(choosed){
-            String restaurantName = user.getRestaurantName();
-            if (restaurantName.length() > 20){
-                restaurantName = restaurantName.substring(0, 20);
-            }
-            String restaurantChoosed = username + " is eating. (" + restaurantName + ")";
-            holder.usernameText.setText(restaurantChoosed);
-        }else {
-            String restaurantLess = username + " hasn't decided yet.";
-            holder.usernameText.setText(restaurantLess);
-        }
+        String restaurantLess = username + " is joining !";
+        holder.usernameText.setText(restaurantLess);
     }
 
     @Override
     public int getItemCount() {
-        if (workmatesList.size() == 0){
+        if (participantsList.size() != 0){
             return 0;
         }else
-        return workmatesList.size();
+            return participantsList.size();
     }
 
-    class WorkmatesViewHolder extends RecyclerView.ViewHolder{
+    class RestaurantProfilViewHolder extends RecyclerView.ViewHolder{
 
         public final View mView;
         private final TextView usernameText;
@@ -86,7 +77,7 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
 
 
 
-        public WorkmatesViewHolder(@NonNull @NotNull View itemView) {
+        public RestaurantProfilViewHolder(@NonNull @NotNull View itemView) {
             super(itemView);
             mView = itemView;
 

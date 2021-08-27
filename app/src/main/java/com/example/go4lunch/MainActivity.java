@@ -186,7 +186,7 @@ public class MainActivity extends BaseActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            // todo add user to firestore
+
                             createUserInFirestore();
                             //updateUI(user);
                             updateUI();
@@ -209,26 +209,18 @@ public class MainActivity extends BaseActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            // todo add user to firestore
+                            // todo check if this above line is useful
+                            //FirebaseUser user = mAuth.getCurrentUser();
                             createUserInFirestore();
-                            //updateUI(user);
                             updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            //updateUI(null);
                             updateUI();
                         }
                     }
                 });
     }
-
-    /*public void updateUI(FirebaseUser account) {
-        if (account != null) {
-            startNavigationActivity();
-        }
-    }*/
 
     private void updateUI(){
         if (isCurrentUserLogged()){

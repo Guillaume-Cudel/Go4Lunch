@@ -2,6 +2,7 @@ package com.example.go4lunch.ui.workmates;
 
 import static androidx.constraintlayout.motion.utils.Oscillator.TAG;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -74,6 +75,16 @@ public class WorkmatesFragment extends Fragment {
     }
 
     private void initList(){
+        UserHelper.getAllUsers(workmatesList);
+        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
+        if (workmatesList.size() > 0) {
+            adapter = new WorkmatesAdapter(workmatesList, getActivity());
+            recyclerView.setAdapter(adapter);
+            loading.cancel();
+        }
+    }
+
+    /*private void initList(){
         CollectionReference userCollection = UserHelper.getUsersCollection();
         userCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -92,11 +103,6 @@ public class WorkmatesFragment extends Fragment {
             }
         });
 
-    }
-
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        initList();
     }*/
+
 }

@@ -10,9 +10,7 @@ public class UserFirebase {
     @Nullable
     private String urlPicture;
     private String restaurantChoosed;
-
-
-
+    private String restaurantName;
 
     public UserFirebase() { }
 
@@ -29,8 +27,8 @@ public class UserFirebase {
     @Nullable
     public String getUrlPicture() { return urlPicture; }
     public Boolean getHaveChoosed() { return haveChoosed; }
-    public String getRestaurantChoosed() { return restaurantChoosed;
-    }
+    public String getRestaurantChoosed() { return restaurantChoosed; }
+    public String getRestaurantName() { return restaurantName; }
 
     // --- SETTERS ---
     public void setHaveChoosed(Boolean mentor) { haveChoosed = mentor; }

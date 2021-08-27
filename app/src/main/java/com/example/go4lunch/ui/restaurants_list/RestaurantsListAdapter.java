@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.go4lunch.R;
-import com.example.go4lunch.RestaurantProfilActivity;
+import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.requests.Photos;
 import com.google.android.gms.maps.model.LatLng;

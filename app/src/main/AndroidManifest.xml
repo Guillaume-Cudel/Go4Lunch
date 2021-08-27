@@ -19,7 +19,7 @@
             android:value="AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704" />
 
         <activity
-            android:name=".RestaurantProfilActivity"
+            android:name=".ui.restaurant_profil.RestaurantProfilActivity"
             android:screenOrientation="portrait" />
 
         <meta-data

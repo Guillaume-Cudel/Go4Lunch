@@ -284,7 +284,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
 
-            ProgressDialog loading = ProgressDialog.show(this, "", "Recoving location", true);
+            ProgressDialog loading = ProgressDialog.show(this, "",
+                    "Recoving location", true);
 
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setInterval(10000);
@@ -294,10 +295,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     if (locationResult == null) {
-                        /*AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
-                        builder.setTitle("No location found.").setMessage("Please check your location's settings.");
-                        AlertDialog dialog = builder.create();
-                        dialog.show();*/
                         return;
                     }
                     for (Location location : locationResult.getLocations()) {
