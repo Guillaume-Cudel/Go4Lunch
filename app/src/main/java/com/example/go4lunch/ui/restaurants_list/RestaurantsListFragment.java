@@ -90,6 +90,8 @@ public class RestaurantsListFragment extends Fragment {
         });
     }
 
+    // todo add methode to get participantsList into profilRestaurant
+
 
 
     private void configureRecyclerView() {

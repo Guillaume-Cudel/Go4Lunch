@@ -52,7 +52,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
     @Override
     public void onBindViewHolder(RestaurantsListViewHolder holder, int position) {
 
-        restaurant = dataList.get(holder.getAdapterPosition());
+        restaurant = dataList.get(position);
         String placeID = restaurant.getPlace_id();
         rating = restaurant.getRating();
         restaurantLatitude = restaurant.getGeometry().getLocation().getLat();

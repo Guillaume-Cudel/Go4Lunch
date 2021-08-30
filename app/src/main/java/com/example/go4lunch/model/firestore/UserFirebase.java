@@ -14,11 +14,14 @@ public class UserFirebase {
 
     public UserFirebase() { }
 
+
     public UserFirebase(String uid, String username, @Nullable String urlPicture) {
         this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;
         this.haveChoosed = false;
+        this.restaurantName = null;
+        this.restaurantChoosed = null;
     }
 
     // --- GETTERS ---
@@ -31,8 +34,7 @@ public class UserFirebase {
     public String getRestaurantName() { return restaurantName; }
 
     // --- SETTERS ---
-    public void setHaveChoosed(Boolean mentor) { haveChoosed = mentor; }
-    public void setRestaurantChoosed(String restaurantChoosed) { this.restaurantChoosed = restaurantChoosed;
-    }
-
+    public void setHaveChoosed(Boolean isChoosed) { this.haveChoosed = isChoosed; }
+    public void setRestaurantChoosed(String restaurantChoosed) { this.restaurantChoosed = restaurantChoosed; }
+    public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
 }

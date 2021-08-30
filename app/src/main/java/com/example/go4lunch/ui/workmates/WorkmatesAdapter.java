@@ -65,6 +65,7 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
             String restaurantChoosed = username + " is eating. (" + restaurantName + ")";
             holder.usernameText.setText(restaurantChoosed);
         }else {
+            //todo change text color to grey
             String restaurantLess = username + " hasn't decided yet.";
             holder.usernameText.setText(restaurantLess);
         }

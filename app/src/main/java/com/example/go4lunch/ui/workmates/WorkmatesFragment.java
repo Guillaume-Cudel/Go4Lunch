@@ -74,7 +74,7 @@ public class WorkmatesFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
     }
 
-    private void initList(){
+    /*private void initList(){
         UserHelper.getAllUsers(workmatesList);
         ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
         if (workmatesList.size() > 0) {
@@ -82,9 +82,11 @@ public class WorkmatesFragment extends Fragment {
             recyclerView.setAdapter(adapter);
             loading.cancel();
         }
-    }
+    }*/
 
-    /*private void initList(){
+    // todo try to take the UserHelper method
+    private void initList(){
+        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
         CollectionReference userCollection = UserHelper.getUsersCollection();
         userCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -93,9 +95,9 @@ public class WorkmatesFragment extends Fragment {
                     for (DocumentSnapshot document : task.getResult()) {
                         UserFirebase user = document.toObject(UserFirebase.class);
                         workmatesList.add(user);
-                        //Log.d(TAG, document.getId() + " => " + document.getData());
                         adapter = new WorkmatesAdapter(workmatesList, getActivity());
                         recyclerView.setAdapter(adapter);
+                        loading.cancel();
                     }
                 } else {
                     Log.d(TAG, "Error getting documents: ", task.getException());
@@ -103,6 +105,6 @@ public class WorkmatesFragment extends Fragment {
             }
         });
 
-    }*/
+    }
 
 }

@@ -29,9 +29,7 @@ import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.example.go4lunch.ui.workmates.WorkmatesAdapter;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,14 +37,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
     private TextView nameText, typeText, vicinityText;
     private ImageView restaurantPhoto,star1, star2, star3, callImage, websiteImage;
-    private FloatingActionButton choosedButton;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseUser currentUser = mAuth.getCurrentUser();
     private String userUid = currentUser.getUid();
@@ -77,7 +73,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         star3 = (ImageView) findViewById(R.id.restaurant_star_3);
         callImage = (ImageView) findViewById(R.id.call_image);
         websiteImage = (ImageView) findViewById(R.id.website_image);
-        choosedButton = (FloatingActionButton) findViewById(R.id.restaurant_choice_button);
+        FloatingActionButton choosedButton = findViewById(R.id.restaurant_choice_button);
         recyclerView = (RecyclerView) findViewById(R.id.profil_restaurant_recyclerView);
 
         recoveData();
@@ -97,46 +93,69 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
-
-        phoneRestaurant();
-        onClickWebsite();
-        onClickChoosedButton();
-
-    }
-
-    // todo think to suppress and add the new user to get restaurantChoosed into firestore
-    private void onClickChoosedButton(){
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean isChoosed;
-
-                if (isChoosed = false) {
-                    UserHelper.updateIsChoosed(userUid, true);
-                    UserHelper.updateRestaurantChoosed(userUid, placeID);
-                    UserHelper.updateRestaurantName(userUid, name);
-                    updateList(isChoosed);
-                    isChoosed = true;
-                }else{
-                    UserHelper.updateIsChoosed(userUid, false);
-                    UserHelper.deleteRestaurantChoosed(userUid);
-                    UserHelper.deleteRestaurantname(userUid);
-                    updateList(isChoosed);
-                    isChoosed = false;
-                }
+                onClickChoosedButton();
+                // todo change fab icon to check icon
             }
         });
+
+
+
+        phoneRestaurant();
+        onClickWebsite();
+
     }
 
-    private void updateList(boolean isChoosed){
+    // todo debug this
+    private void onClickChoosedButton(){
         DocumentReference document = UserHelper.getUsersCollection().document(userUid);
         document.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 UserFirebase retrieveUser = documentSnapshot.toObject(UserFirebase.class);
-                if(!isChoosed) {
+                if (retrieveUser != null) {
+                    boolean haveChoosed = retrieveUser.getHaveChoosed();
+
+                    //todo do progress bar while haveChoosed have not changed
+                    if (!haveChoosed) {
+                        UserHelper.deleteRestaurantChoosed(userUid);
+                        UserHelper.deleteRestaurantname(userUid);
+                        UserHelper.updateHaveChoosed(userUid, true);
+                        participantslist.remove(retrieveUser);
+                        adapter = new RestaurantProfilAdapter(participantslist, context);
+                        recyclerView.setAdapter(adapter);
+                        //updateList(haveChoosed);
+                    } else {
+                        UserHelper.updateRestaurantChoosed(userUid, placeID);
+                        UserHelper.updateRestaurantName(userUid, name);
+                        UserHelper.updateHaveChoosed(userUid, false);
+                        //updateList(haveChoosed);
+                        participantslist.add(retrieveUser);
+                        adapter = new RestaurantProfilAdapter(participantslist, context);
+                        recyclerView.setAdapter(adapter);
+                    }
+                }
+            }
+        });
+    }
+
+    private void updateList(boolean haveChoosed){
+        DocumentReference document = UserHelper.getUsersCollection().document(userUid);
+        document.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                UserFirebase retrieveUser = documentSnapshot.toObject(UserFirebase.class);
+                if(!haveChoosed) {
+                    retrieveUser.setRestaurantName(name);
+                    retrieveUser.setRestaurantChoosed(placeID);
+                    retrieveUser.setHaveChoosed(true);
                     participantslist.add(retrieveUser);
                 }else {
+                    retrieveUser.setRestaurantName(null);
+                    retrieveUser.setRestaurantChoosed(null);
+                    retrieveUser.setHaveChoosed(false);
                     participantslist.remove(retrieveUser);
                 }
                 adapter = new RestaurantProfilAdapter(participantslist, context);

@@ -7,15 +7,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.example.go4lunch.ui.workmates.WorkmatesAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
@@ -25,7 +21,7 @@ public class UserHelper {
     private static final String COLLECTION_NAME = "users";
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
-    private static final String IS_CHOOSED_FIELD = "isChoosed";
+    private static final String HAVE_CHOOSED_FIELD = "haveChoosed";
 
     // Get the Collection Reference
     public static CollectionReference getUsersCollection(){
@@ -70,25 +66,26 @@ public class UserHelper {
     // --- UPDATE ---
 
 
-    public static Task<Void> updateIsChoosed(String uid, Boolean isChoosed) {
-        return UserHelper.getUsersCollection().document(uid).update(IS_CHOOSED_FIELD, isChoosed);
+    public static void updateHaveChoosed(String uid, Boolean haveChoosed) {
+        UserHelper.getUsersCollection().document(uid).update(HAVE_CHOOSED_FIELD, haveChoosed);
     }
 
-    public static Task<Void> updateRestaurantChoosed(String uid, String restaurantChoosed){
-        return UserHelper.getUsersCollection().document(uid).update(RESTAURANT_CHOOSED_FIELD, restaurantChoosed);
+    public static void updateRestaurantChoosed(String uid, String restaurantChoosed){
+        UserHelper.getUsersCollection().document(uid).update(RESTAURANT_CHOOSED_FIELD, restaurantChoosed);
     }
 
-    public static Task<Void> updateRestaurantName(String uid, String restaurantName){
-        return UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, restaurantName);
+    public static void updateRestaurantName(String uid, String restaurantName){
+        UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, restaurantName);
     }
+
 
     // --- DELETE ---
-    public static Task<Void> deleteRestaurantChoosed(String uid) {
-        return UserHelper.getUsersCollection().document(uid).update(RESTAURANT_CHOOSED_FIELD, FieldValue.delete());
+    public static void deleteRestaurantChoosed(String uid) {
+        UserHelper.getUsersCollection().document(uid).update(RESTAURANT_CHOOSED_FIELD, null);
     }
 
-    public static Task<Void> deleteRestaurantname(String uid) {
-        return UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, FieldValue.delete());
+    public static void deleteRestaurantname(String uid) {
+        UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, null);
     }
 
 }

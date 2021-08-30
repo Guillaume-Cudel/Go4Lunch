@@ -23,7 +23,7 @@ import java.util.List;
 
 public class RestaurantProfilAdapter extends RecyclerView.Adapter<RestaurantProfilAdapter.RestaurantProfilViewHolder> {
 
-    private List<UserFirebase> participantsList = new ArrayList<>();
+    private List<UserFirebase> participantsList;
     private final Context context;
 
     public RestaurantProfilAdapter(final List<UserFirebase> list, Context context){
@@ -63,7 +63,7 @@ public class RestaurantProfilAdapter extends RecyclerView.Adapter<RestaurantProf
 
     @Override
     public int getItemCount() {
-        if (participantsList.size() != 0){
+        if (participantsList.size() == 0){
             return 0;
         }else
             return participantsList.size();
