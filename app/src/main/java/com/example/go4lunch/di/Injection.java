@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.go4lunch.repository.RestaurantRepository;
 import com.example.go4lunch.network.ApiService;
 import com.example.go4lunch.repository.RestaurantRepositoryImpl;
+import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
+import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.example.go4lunch.viewModel.RestaurantViewModel;
 import com.example.go4lunch.viewModel.ViewModelFactory;
@@ -45,6 +47,15 @@ public class Injection {
     public static LocationViewModel provideLocationViewModel(FragmentActivity activity){
         return new ViewModelProvider(activity).get(LocationViewModel.class);
     }
+
+    public static FirestoreUserViewModel provideFirestoreUserViewModel(FragmentActivity activity){
+        return new ViewModelProvider(activity).get(FirestoreUserViewModel.class);
+    }
+
+    public static FirestoreRestaurantViewModel provideFirestoreRestaurantViewModel(FragmentActivity activity){
+        return new ViewModelProvider(activity).get(FirestoreRestaurantViewModel.class);
+    }
+
 
 
 

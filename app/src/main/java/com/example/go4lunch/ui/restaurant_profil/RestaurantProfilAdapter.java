@@ -69,6 +69,11 @@ public class RestaurantProfilAdapter extends RecyclerView.Adapter<RestaurantProf
             return participantsList.size();
     }
 
+    public void updateData(List<UserFirebase> participants){
+        this.participantsList = participants;
+        this.notifyDataSetChanged();
+    }
+
     class RestaurantProfilViewHolder extends RecyclerView.ViewHolder{
 
         public final View mView;

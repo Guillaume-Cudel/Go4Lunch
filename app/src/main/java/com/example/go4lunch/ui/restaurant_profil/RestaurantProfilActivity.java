@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
@@ -25,32 +26,37 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
-import com.example.go4lunch.api.UserHelper;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
+import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
     private TextView nameText, typeText, vicinityText;
     private ImageView restaurantPhoto,star1, star2, star3, callImage, websiteImage;
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private FirebaseUser currentUser = mAuth.getCurrentUser();
-    private String userUid = currentUser.getUid();
+    private FloatingActionButton choosedButton;
+
     @NonNull
-    private final ArrayList<UserFirebase> participantslist = new ArrayList<>();
+    private List<UserFirebase> participantslist = new ArrayList<>();
+    private UserFirebase userParticipant = null;
     private RecyclerView recyclerView;
     private RestaurantProfilAdapter adapter = new RestaurantProfilAdapter(participantslist, this);
     private Context context;
+    private FirestoreUserViewModel fUserViewModel;
+    private FirestoreRestaurantViewModel fRestaurantViewModel;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser currentUser = mAuth.getCurrentUser();
+    private String userUid = currentUser.getUid();
 
     private static final int REQUEST_CALL_PHONE_PERMISSION = 100;
 
@@ -64,18 +70,8 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-        nameText = (TextView) findViewById(R.id.restaurant_title);
-        typeText = (TextView) findViewById(R.id.restaurant_kind);
-        vicinityText = (TextView) findViewById(R.id.restaurant_address);
-        restaurantPhoto = (ImageView) findViewById(R.id.restaurant_image);
-        star1 = (ImageView) findViewById(R.id.restaurant_star_1);
-        star2 = (ImageView) findViewById(R.id.restaurant_star_2);
-        star3 = (ImageView) findViewById(R.id.restaurant_star_3);
-        callImage = (ImageView) findViewById(R.id.call_image);
-        websiteImage = (ImageView) findViewById(R.id.website_image);
-        FloatingActionButton choosedButton = findViewById(R.id.restaurant_choice_button);
-        recyclerView = (RecyclerView) findViewById(R.id.profil_restaurant_recyclerView);
 
+        configureView();
         recoveData();
         setFieldsWithData();
 
@@ -93,76 +89,129 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
+        fRestaurantViewModel.getRestaurantsList().observe(RestaurantProfilActivity.this, new Observer<List<Restaurant>>() {
+            @Override
+            public void onChanged(List<Restaurant> restaurants) {
+                for(Restaurant restaurant : restaurants){
+                    //todo warning, methods add many time the restaurant
+                    if(restaurant.getPlace_id().equals(placeID)){
+                        // do nothing
+                    }else{
+                        fRestaurantViewModel.createRestaurant(placeID);
+                    }
+                }
+            }
+        });
+
+        fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
+            @Override
+            public void onChanged(List<UserFirebase> participants) {
+                RestaurantProfilActivity.this.participantslist.clear();
+                RestaurantProfilActivity.this.participantslist.addAll(participants);
+                //todo finish this
+            }
+        });
+
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onClickChoosedButton();
-                // todo change fab icon to check icon
             }
         });
 
-
-
         phoneRestaurant();
         onClickWebsite();
-
+        configureRecyclerView();
     }
 
-    // todo debug this
-    private void onClickChoosedButton(){
-        DocumentReference document = UserHelper.getUsersCollection().document(userUid);
-        document.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                UserFirebase retrieveUser = documentSnapshot.toObject(UserFirebase.class);
-                if (retrieveUser != null) {
-                    boolean haveChoosed = retrieveUser.getHaveChoosed();
+    private void configureView(){
+        nameText = (TextView) findViewById(R.id.restaurant_title);
+        typeText = (TextView) findViewById(R.id.restaurant_kind);
+        vicinityText = (TextView) findViewById(R.id.restaurant_address);
+        restaurantPhoto = (ImageView) findViewById(R.id.restaurant_image);
+        star1 = (ImageView) findViewById(R.id.restaurant_star_1);
+        star2 = (ImageView) findViewById(R.id.restaurant_star_2);
+        star3 = (ImageView) findViewById(R.id.restaurant_star_3);
+        callImage = (ImageView) findViewById(R.id.call_image);
+        websiteImage = (ImageView) findViewById(R.id.website_image);
+        choosedButton = findViewById(R.id.restaurant_choice_button);
+        recyclerView = (RecyclerView) findViewById(R.id.profil_restaurant_recyclerView);
+        fUserViewModel = Injection.provideFirestoreUserViewModel(this);
+        fRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
+    }
 
-                    //todo do progress bar while haveChoosed have not changed
-                    if (!haveChoosed) {
-                        UserHelper.deleteRestaurantChoosed(userUid);
-                        UserHelper.deleteRestaurantname(userUid);
-                        UserHelper.updateHaveChoosed(userUid, true);
-                        participantslist.remove(retrieveUser);
-                        adapter = new RestaurantProfilAdapter(participantslist, context);
-                        recyclerView.setAdapter(adapter);
-                        //updateList(haveChoosed);
-                    } else {
-                        UserHelper.updateRestaurantChoosed(userUid, placeID);
-                        UserHelper.updateRestaurantName(userUid, name);
-                        UserHelper.updateHaveChoosed(userUid, false);
-                        //updateList(haveChoosed);
-                        participantslist.add(retrieveUser);
-                        adapter = new RestaurantProfilAdapter(participantslist, context);
-                        recyclerView.setAdapter(adapter);
+
+    //todo useless, remove it
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //todo replace this to onCreate()
+        fUserViewModel.getParticipantsListLiveData().observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
+            @Override
+            public void onChanged(List<UserFirebase> list) {
+                for(UserFirebase user : list){
+                    if(user.getRestaurantChoosed().equals(placeID)){
+                        participantslist.add(user);
                     }
+                }
+                //participantslist = list;
+                updateParticipants();
+            }
+        });
+    }
+
+    private void configureRecyclerView(){
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new RestaurantProfilAdapter(participantslist, context);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void updateParticipants(){
+        adapter.updateData(participantslist);
+    }
+
+
+    private void onClickChoosedButton(){
+        // todo useless
+        Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                userParticipant = userFirebase;
+                boolean haveChoosed = userParticipant.getHaveChoosed();
+
+                if(userParticipant != null) {
+                    updateList(haveChoosed);
                 }
             }
         });
     }
 
     private void updateList(boolean haveChoosed){
-        DocumentReference document = UserHelper.getUsersCollection().document(userUid);
-        document.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                UserFirebase retrieveUser = documentSnapshot.toObject(UserFirebase.class);
-                if(!haveChoosed) {
-                    retrieveUser.setRestaurantName(name);
-                    retrieveUser.setRestaurantChoosed(placeID);
-                    retrieveUser.setHaveChoosed(true);
-                    participantslist.add(retrieveUser);
-                }else {
-                    retrieveUser.setRestaurantName(null);
-                    retrieveUser.setRestaurantChoosed(null);
-                    retrieveUser.setHaveChoosed(false);
-                    participantslist.remove(retrieveUser);
-                }
-                adapter = new RestaurantProfilAdapter(participantslist, context);
-                recyclerView.setAdapter(adapter);
+        //todo change to get with other collection
+            if (!haveChoosed) {
+                fUserViewModel.updateRestaurantChoosed(userParticipant.getUid(), placeID);
+                fUserViewModel.updateRestaurantName(userParticipant.getUid(), name);
+                fUserViewModel.updateUserStatus(userParticipant.getUid(), true);
+                //todo marche pas
+                //firestoreUserViewModel.addToParticipantsList(userParticipant);
+                participantslist.add(userParticipant);
+                updateParticipants();
+                choosedButton.setImageResource(R.drawable.ic_validated);
+
+            }else {
+                fUserViewModel.deleteRestaurantChoosed(userParticipant.getUid());
+                fUserViewModel.deleteRestaurantname(userParticipant.getUid());
+                fUserViewModel.updateUserStatus(userParticipant.getUid(), false);
+                //firestoreUserViewModel.removeToParticipantsList(userParticipant);
+                //todo don't remove into the list
+                participantslist.remove(userParticipant);
+                updateParticipants();
+                choosedButton.setImageResource(R.drawable.ic_go);
             }
-        });
     }
+
 
     private void recoveData() {
         Bundle i = getIntent().getExtras();

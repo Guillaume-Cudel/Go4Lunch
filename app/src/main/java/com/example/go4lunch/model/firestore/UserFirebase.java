@@ -33,8 +33,4 @@ public class UserFirebase {
     public String getRestaurantChoosed() { return restaurantChoosed; }
     public String getRestaurantName() { return restaurantName; }
 
-    // --- SETTERS ---
-    public void setHaveChoosed(Boolean isChoosed) { this.haveChoosed = isChoosed; }
-    public void setRestaurantChoosed(String restaurantChoosed) { this.restaurantChoosed = restaurantChoosed; }
-    public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
 }

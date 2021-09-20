@@ -105,7 +105,7 @@
         android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toBottomOf="@id/restaurant_title"
         app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/ic_baseline_thumb_up"
+        android:src="@drawable/ic_go"
         app:tint="@color/orange"
         app:backgroundTint="@color/white"/>
 

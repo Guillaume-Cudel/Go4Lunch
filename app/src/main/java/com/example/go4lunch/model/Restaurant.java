@@ -50,6 +50,10 @@ public class Restaurant {
         this.types = types;
     }
 
+    public Restaurant(String placeID){
+        this.place_id = placeID;
+    }
+
     public String getName() {
         return name;
     }

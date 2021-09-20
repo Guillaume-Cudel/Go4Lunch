@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -27,26 +26,24 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.di.Injection;
+import com.example.go4lunch.model.firestore.UserFirebase;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
 import com.example.go4lunch.ui.workmates.WorkmatesFragment;
+import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-
-import java.text.NumberFormat;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -56,6 +53,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private ActivityNavigationBinding binding;
     private BottomNavigationView mBottomNavigationView;
     private LocationViewModel locationViewModel;
+    private FirestoreUserViewModel firestoreUserViewModel;
     private LocationCallback locationCallback;
 
     public Fragment fragmentMap;
@@ -68,6 +66,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
+    private UserFirebase mUser;
 
 
     @Override
@@ -86,6 +85,11 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         mBottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation_bottom_nav_view);
 
         locationViewModel = Injection.provideLocationViewModel(this);
+        firestoreUserViewModel = Injection.provideFirestoreUserViewModel(this);
+
+        /*if(mUser == null){
+            recoveUser();
+        }*/
 
         // Show the first fragment when starting activity
         fragmentMap = new MapFragment();

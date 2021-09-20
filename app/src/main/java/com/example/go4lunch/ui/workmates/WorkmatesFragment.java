@@ -1,38 +1,21 @@
 package com.example.go4lunch.ui.workmates;
 
-import static androidx.constraintlayout.motion.utils.Oscillator.TAG;
-
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
-import com.example.go4lunch.api.UserHelper;
-import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.example.go4lunch.ui.restaurants_list.RestaurantsListAdapter;
-import com.example.go4lunch.viewModel.LocationViewModel;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +41,6 @@ public class WorkmatesFragment extends Fragment {
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_workmates_list);
 
-        configureRecyclerView();
         return view;
 
     }
@@ -66,26 +48,37 @@ public class WorkmatesFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initList();
+
+        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
+
+        Injection.provideFirestoreUserViewModel(getActivity()).getWorkmatesList().observe(this.getActivity(), new Observer<List<UserFirebase>>() {
+            @Override
+            public void onChanged(List<UserFirebase> users) {
+                WorkmatesFragment.this.workmatesList.clear();
+                WorkmatesFragment.this.workmatesList.addAll(users);
+                updateWorkmates();
+                loading.cancel();
+            }
+        });
+        configureRecyclerView();
+
+        //initList();
     }
+
 
     private void configureRecyclerView() {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getActivity());
         recyclerView.setLayoutManager(layoutManager);
+        adapter = new WorkmatesAdapter(workmatesList, getActivity());
+        recyclerView.setAdapter(adapter);
     }
 
-    /*private void initList(){
-        UserHelper.getAllUsers(workmatesList);
-        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
-        if (workmatesList.size() > 0) {
-            adapter = new WorkmatesAdapter(workmatesList, getActivity());
-            recyclerView.setAdapter(adapter);
-            loading.cancel();
-        }
-    }*/
+    private void updateWorkmates(){
+        adapter.updateData(workmatesList);
+    }
 
-    // todo try to take the UserHelper method
-    private void initList(){
+
+    /*private void initList(){
         ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
         CollectionReference userCollection = UserHelper.getUsersCollection();
         userCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -105,6 +98,6 @@ public class WorkmatesFragment extends Fragment {
             }
         });
 
-    }
+    }*/
 
 }

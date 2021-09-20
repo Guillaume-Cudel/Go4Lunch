@@ -7,13 +7,17 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserHelper {
@@ -23,6 +27,7 @@ public class UserHelper {
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
     private static final String HAVE_CHOOSED_FIELD = "haveChoosed";
 
+
     // Get the Collection Reference
     public static CollectionReference getUsersCollection(){
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
@@ -30,27 +35,24 @@ public class UserHelper {
 
     // --- CREATE ---
 
-    public static Task<Void> createUser(String uid, String username, String urlPicture) {
+    public static void createUser(String uid, String username, String urlPicture) {
         UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
-        return UserHelper.getUsersCollection().document(uid).set(userToCreate);
+        UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
     // --- GET ---
 
-    /*public static Task<DocumentSnapshot> getUser(String uid){
-        return UserHelper.getUsersCollection().document(uid).get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                       UserFirebase user = documentSnapshot.toObject(UserFirebase.class);
-                    }
-                });
-    }*/
+    public interface GetUsersListCallback{
+        void onSuccess(List<UserFirebase> list);
 
-    public static Task<QuerySnapshot> getAllUsers(List<UserFirebase> users){
-        return UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        void onError(Exception exception);
+    }
+
+    public static void getAllUsers(GetUsersListCallback callback){
+        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                List<UserFirebase> users = new ArrayList<>();
                 if (task.isSuccessful()) {
                     for (DocumentSnapshot document : task.getResult()) {
                         UserFirebase user = document.toObject(UserFirebase.class);
@@ -58,14 +60,42 @@ public class UserHelper {
                     }
                 } else {
                     Log.d(TAG, "Error getting documents: ", task.getException());
+                    callback.onError(new Exception());
                 }
+                callback.onSuccess(users);
             }
         });
     }
 
+    public interface GetUserCallback{
+        void onSuccess(UserFirebase user);
+
+        void onError(Exception exception);
+    }
+
+    public static void getUser(String uid, GetUserCallback callback){
+        DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                UserFirebase user = new UserFirebase();
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    user = document.toObject(UserFirebase.class);
+                    //callback.onSuccess(user);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(user);
+            }
+        });
+    }
+
+
     // --- UPDATE ---
 
 
+    // todo remove boolean
     public static void updateHaveChoosed(String uid, Boolean haveChoosed) {
         UserHelper.getUsersCollection().document(uid).update(HAVE_CHOOSED_FIELD, haveChoosed);
     }

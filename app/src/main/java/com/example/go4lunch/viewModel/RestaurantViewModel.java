@@ -17,7 +17,7 @@ public class RestaurantViewModel extends ViewModel {
     private static final String TYPE = "restaurant";
     private static final String FIELDS = "formatted_phone_number,opening_hours,website";
     private MutableLiveData<List<Restaurant>> restaurantListLiveData;
-    public MutableLiveData<Details> detailsLiveData;
+    private MutableLiveData<Details> detailsLiveData;
 
 
     private final RestaurantRepository restaurantRepository;

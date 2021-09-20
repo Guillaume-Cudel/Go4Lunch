@@ -1,6 +1,7 @@
 package com.example.go4lunch.ui.workmates;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,8 +54,7 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
         }
 
         String username = user.getUsername();
-        /*String restaurantLess = username + " hasn't decided yet.";
-        holder.usernameText.setText(restaurantLess);*/
+
 
         boolean choosed = user.getHaveChoosed();
         if(choosed){
@@ -62,12 +62,14 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
             if (restaurantName.length() > 20){
                 restaurantName = restaurantName.substring(0, 20);
             }
+            //todo add other textView below username to display the restaurant choosed
             String restaurantChoosed = username + " is eating. (" + restaurantName + ")";
             holder.usernameText.setText(restaurantChoosed);
         }else {
-            //todo change text color to grey
             String restaurantLess = username + " hasn't decided yet.";
             holder.usernameText.setText(restaurantLess);
+            holder.usernameText.setTextColor(Color.GRAY);
+
         }
     }
 
@@ -77,6 +79,11 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
             return 0;
         }else
         return workmatesList.size();
+    }
+
+    public void updateData(List<UserFirebase> workmates){
+        this.workmatesList = workmates;
+        this.notifyDataSetChanged();
     }
 
     class WorkmatesViewHolder extends RecyclerView.ViewHolder{
