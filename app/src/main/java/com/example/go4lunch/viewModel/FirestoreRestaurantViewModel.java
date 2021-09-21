@@ -64,4 +64,8 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         }
         return participantsListLiveData;
     }
+
+    public void deleteParticipant(String placeID, String uid){
+        RestaurantHelper.deleteParticipant(placeID, uid);
+    }
 }

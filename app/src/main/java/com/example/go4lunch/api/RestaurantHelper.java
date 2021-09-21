@@ -102,6 +102,11 @@ public class RestaurantHelper {
         });
     }
 
+    // --- DELETE ---
+    public static void deleteParticipant(String placeID, String uid) {
+        RestaurantHelper.getUsersCollection(placeID).document(uid).delete();
+    }
+
 
 
 }

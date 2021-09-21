@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -89,28 +90,8 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
-        fRestaurantViewModel.getRestaurantsList().observe(RestaurantProfilActivity.this, new Observer<List<Restaurant>>() {
-            @Override
-            public void onChanged(List<Restaurant> restaurants) {
-                for(Restaurant restaurant : restaurants){
-                    //todo warning, methods add many time the restaurant
-                    if(restaurant.getPlace_id().equals(placeID)){
-                        // do nothing
-                    }else{
-                        fRestaurantViewModel.createRestaurant(placeID);
-                    }
-                }
-            }
-        });
-
-        fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
-            @Override
-            public void onChanged(List<UserFirebase> participants) {
-                RestaurantProfilActivity.this.participantslist.clear();
-                RestaurantProfilActivity.this.participantslist.addAll(participants);
-                //todo finish this
-            }
-        });
+        addRestaurantToDatabase();
+        recoveParticipants();
 
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,25 +121,37 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
     }
 
-
-    //todo useless, remove it
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //todo replace this to onCreate()
-        fUserViewModel.getParticipantsListLiveData().observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
+    private void addRestaurantToDatabase(){
+        fRestaurantViewModel.getRestaurantsList().observe(RestaurantProfilActivity.this, new Observer<List<Restaurant>>() {
             @Override
-            public void onChanged(List<UserFirebase> list) {
-                for(UserFirebase user : list){
-                    if(user.getRestaurantChoosed().equals(placeID)){
-                        participantslist.add(user);
+            public void onChanged(List<Restaurant> restaurants) {
+                boolean verification = false;
+                for(Restaurant restaurant : restaurants){
+                    if(restaurant.getPlace_id().equals(placeID)){
+                        verification = true;
                     }
                 }
-                //participantslist = list;
-                updateParticipants();
+                if (!verification){
+                    fRestaurantViewModel.createRestaurant(placeID);
+                }
             }
         });
     }
+
+    private void recoveParticipants(){
+        ProgressDialog loading = ProgressDialog.show(RestaurantProfilActivity.this, "", "Recoving participants", true);
+
+        fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
+            @Override
+            public void onChanged(List<UserFirebase> participants) {
+                RestaurantProfilActivity.this.participantslist.clear();
+                RestaurantProfilActivity.this.participantslist.addAll(participants);
+                updateParticipants();
+                loading.cancel();
+            }
+        });
+    }
+
 
     private void configureRecyclerView(){
 
@@ -174,38 +167,40 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
 
     private void onClickChoosedButton(){
-        // todo useless
+        boolean isParticipant = false;
+        for(UserFirebase user : participantslist){
+            if(user.getUid().equals(userUid)){
+                isParticipant = true;
+            }
+        }
+        updateList(isParticipant);
+    }
+
+    private void updateList(boolean isParticipant){
+
         Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
                 userParticipant = userFirebase;
-                boolean haveChoosed = userParticipant.getHaveChoosed();
-
-                if(userParticipant != null) {
-                    updateList(haveChoosed);
-                }
             }
         });
-    }
 
-    private void updateList(boolean haveChoosed){
-        //todo change to get with other collection
-            if (!haveChoosed) {
+        //todo check if userParticipant is non null
+            if (!isParticipant) {
                 fUserViewModel.updateRestaurantChoosed(userParticipant.getUid(), placeID);
                 fUserViewModel.updateRestaurantName(userParticipant.getUid(), name);
-                fUserViewModel.updateUserStatus(userParticipant.getUid(), true);
-                //todo marche pas
+                fRestaurantViewModel.createUserToRestaurant(placeID, userParticipant.getUid(), userParticipant.getUsername(), userParticipant.getUrlPicture());
                 //firestoreUserViewModel.addToParticipantsList(userParticipant);
-                participantslist.add(userParticipant);
+                //participantslist.add(userParticipant);
+                // todo useful?
                 updateParticipants();
                 choosedButton.setImageResource(R.drawable.ic_validated);
 
             }else {
                 fUserViewModel.deleteRestaurantChoosed(userParticipant.getUid());
                 fUserViewModel.deleteRestaurantname(userParticipant.getUid());
-                fUserViewModel.updateUserStatus(userParticipant.getUid(), false);
-                //firestoreUserViewModel.removeToParticipantsList(userParticipant);
-                //todo don't remove into the list
+                fRestaurantViewModel.deleteParticipant(placeID, userParticipant.getUid());
+                //todo useful?
                 participantslist.remove(userParticipant);
                 updateParticipants();
                 choosedButton.setImageResource(R.drawable.ic_go);

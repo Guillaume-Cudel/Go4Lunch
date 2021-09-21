@@ -6,6 +6,7 @@ public class UserFirebase {
 
     private String uid;
     private String username;
+    //todo remove boolean
     private Boolean haveChoosed;
     @Nullable
     private String urlPicture;
