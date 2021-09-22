@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -49,7 +48,8 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     @NonNull
     private List<UserFirebase> participantslist = new ArrayList<>();
-    private UserFirebase mUserParticipant = null;
+    private UserFirebase mCurrentUser = null;
+    private UserFirebase mParticipantUser = null;
     private Restaurant mRestaurant = null;
     private RecyclerView recyclerView;
     private RestaurantProfilAdapter adapter = new RestaurantProfilAdapter(participantslist, this);
@@ -92,7 +92,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 });
 
         addRestaurantToDatabase(placeID);
-        recoveParticipants(mRestaurant);
 
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,15 +125,18 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel.getRestaurant(placeID).observe(RestaurantProfilActivity.this, new Observer<Restaurant>() {
             @Override
             public void onChanged(Restaurant restaurant) {
-                if (restaurant == null) {
+                mRestaurant = restaurant;
+                if (mRestaurant == null) {
                     fRestaurantViewModel.createRestaurant(placeID);
+                }else{
+                    //recoveParticipants(mRestaurant);
                 }
             }
         });
     }
 
     private void recoveParticipants(Restaurant restaurant) {
-        ProgressDialog loading = ProgressDialog.show(RestaurantProfilActivity.this, "", "Recoving participants", true);
+        //ProgressDialog loading = ProgressDialog.show(RestaurantProfilActivity.this, "", "Recoving participants", true);
 
         if (restaurant != null) {
             fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
@@ -143,12 +145,28 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     RestaurantProfilActivity.this.participantslist.clear();
                     RestaurantProfilActivity.this.participantslist.addAll(participants);
                     updateParticipants();
-                    loading.cancel();
+                    //loading.cancel();
                 }
             });
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Injection.provideFirestoreRestaurantViewModel(this).getParticipantsList(placeID)
+                .observe(this, new Observer<List<UserFirebase>>() {
+                    @Override
+                    public void onChanged(List<UserFirebase> userFirebases) {
+                        if (userFirebases.size() > 0){
+                            choosedButton.setImageResource(R.drawable.ic_validated);
+                        }
+                        RestaurantProfilActivity.this.participantslist.clear();
+                        RestaurantProfilActivity.this.participantslist.addAll(userFirebases);
+                        updateParticipants();
+                    }
+                });
+    }
 
     private void configureRecyclerView() {
 
@@ -168,21 +186,34 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
-                mUserParticipant = userFirebase;
+                mCurrentUser = userFirebase;
+            }
+        });
 
-                if (mUserParticipant == null) {
-                    fUserViewModel.updateRestaurantChoosed(mUserParticipant.getUid(), placeID);
-                    fUserViewModel.updateRestaurantName(mUserParticipant.getUid(), name);
-                    fRestaurantViewModel.createUserToRestaurant(placeID, mUserParticipant.getUid(), mUserParticipant.getUsername(), mUserParticipant.getUrlPicture());
-                    choosedButton.setImageResource(R.drawable.ic_validated);
-                } else {
-                    fUserViewModel.deleteRestaurantChoosed(mUserParticipant.getUid());
-                    fUserViewModel.deleteRestaurantname(mUserParticipant.getUid());
-                    fRestaurantViewModel.deleteParticipant(placeID, mUserParticipant.getUid());
-                    choosedButton.setImageResource(R.drawable.ic_go);
+        //todo add condition if user have not choosed restaurant yet
+        fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                mParticipantUser = userFirebase;
+                if(mCurrentUser != null){
+                    if (mParticipantUser == null) {
+                        fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
+                        fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
+                        fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                        choosedButton.setImageResource(R.drawable.ic_validated);
+                        updateParticipants();
+                    } else {
+                        fUserViewModel.deleteRestaurantChoosed(mCurrentUser.getUid());
+                        fUserViewModel.deleteRestaurantname(mCurrentUser.getUid());
+                        fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
+                        choosedButton.setImageResource(R.drawable.ic_go);
+                        updateParticipants();
+                    }
                 }
             }
         });
+
+
     }
 
 

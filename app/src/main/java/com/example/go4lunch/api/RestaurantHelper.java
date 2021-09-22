@@ -5,15 +5,20 @@ import static androidx.constraintlayout.motion.utils.Oscillator.TAG;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -51,14 +56,33 @@ public class RestaurantHelper {
 
     // -------- GET ----------
 
-    public interface GetUsersListCallback{
+    public interface GetAllUsersCallback {
         void onSuccess(List<UserFirebase> list);
 
         void onError(Exception exception);
     }
 
-    public static void getAllUsers(String placeID, GetUsersListCallback callback){
-        RestaurantHelper.getUsersCollection(placeID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    public static void getAllUsers(String placeID, GetAllUsersCallback callback){
+        RestaurantHelper.getUsersCollection(placeID).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+
+                List<UserFirebase> users = new ArrayList<>();
+                for (QueryDocumentSnapshot doc : value) {
+                    UserFirebase user = doc.toObject(UserFirebase.class);
+                    users.add(user);
+                }
+                callback.onSuccess(users);
+            }
+        });
+
+        //-----------------
+       /* RestaurantHelper.getUsersCollection(placeID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 List<UserFirebase> users = new ArrayList<>();
@@ -73,21 +97,44 @@ public class RestaurantHelper {
                 }
                 callback.onSuccess(users);
             }
+        });*/
+    }
+
+    public interface GetUserTargetedCallback{
+        void onSuccess(UserFirebase user);
+
+        void onError( Exception exception);
+    }
+
+    public static void getTargetedUserCallback(String placeID, String uid, GetUserTargetedCallback callback){
+        DocumentReference docRef = RestaurantHelper.getUsersCollection(placeID).document(uid);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                UserFirebase user = new UserFirebase();
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    user = document.toObject(UserFirebase.class);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(user);
+            }
         });
     }
 
-    public interface GetRestaurantsListCallback{
+    public interface GetRestaurantsTargetedCallback {
         void onSuccess(Restaurant restaurant);
 
         void onError(Exception exception);
     }
 
-    public static void getTargetedRestaurant(String placeId, GetRestaurantsListCallback callback){
+    public static void getTargetedRestaurant(String placeId, GetRestaurantsTargetedCallback callback){
         DocumentReference docRef = RestaurantHelper.getRestaurantsCollection().document(placeId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                Restaurant restaurant = new Restaurant(placeId);
+                Restaurant restaurant = new Restaurant();
                 if (task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     restaurant = document.toObject(Restaurant.class);
@@ -99,24 +146,6 @@ public class RestaurantHelper {
         });
     }
 
-    /*public static void getAllRestaurants(RestaurantHelper.GetRestaurantsListCallback callback){
-        RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                List<Restaurant> restaurants = new ArrayList<>();
-                if(task.isSuccessful()){
-                    for(DocumentSnapshot document : task.getResult()){
-                        Restaurant restaurant = document.toObject(Restaurant.class);
-                        restaurants.add(restaurant);
-                    }
-                } else{
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                    callback.onError(new Exception());
-                }
-                callback.onSuccess(restaurants);
-            }
-        });
-    }*/
 
     // --- DELETE ---
     public static void deleteParticipant(String placeID, String uid) {

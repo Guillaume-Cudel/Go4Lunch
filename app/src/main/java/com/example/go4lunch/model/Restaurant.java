@@ -37,6 +37,13 @@ public class Restaurant {
     private String place_id;
     private Details details;
 
+    public Restaurant(){
+
+    }
+
+    public Restaurant(String placeID){
+        this.place_id = placeID;
+    }
 
     public Restaurant(String name, String vicinity, OpeningHours opening_hours, Geometry geometry,
                       String rating, List<Photos> photos, List<String> types) {
@@ -48,10 +55,6 @@ public class Restaurant {
         this.rating = rating;
         this.photos = photos;
         this.types = types;
-    }
-
-    public Restaurant(String placeID){
-        this.place_id = placeID;
     }
 
     public String getName() {

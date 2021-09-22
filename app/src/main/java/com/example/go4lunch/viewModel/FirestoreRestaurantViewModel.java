@@ -13,9 +13,11 @@ import java.util.List;
 public class FirestoreRestaurantViewModel extends ViewModel {
 
     private MutableLiveData<Restaurant> restaurantLiveData;
+    private MutableLiveData<UserFirebase> userLiveData;
     private MutableLiveData<List<UserFirebase>> participantsListLiveData;
 
     private Restaurant mRestaurant;
+    private UserFirebase mUser;
     private List<UserFirebase> mParticipants;
 
     public void createRestaurant(String placeID) {
@@ -30,7 +32,7 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         if (restaurantLiveData == null) {
             restaurantLiveData = new MutableLiveData<Restaurant>();
 
-            RestaurantHelper.getTargetedRestaurant(placeID, new RestaurantHelper.GetRestaurantsListCallback() {
+            RestaurantHelper.getTargetedRestaurant(placeID, new RestaurantHelper.GetRestaurantsTargetedCallback() {
                 @Override
                 public void onSuccess(Restaurant restaurant) {
                     mRestaurant = restaurant;
@@ -39,7 +41,6 @@ public class FirestoreRestaurantViewModel extends ViewModel {
 
                 @Override
                 public void onError(Exception exception) {
-
                     restaurantLiveData.postValue(null);
                 }
             });
@@ -47,10 +48,30 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         return restaurantLiveData;
     }
 
+    public LiveData<UserFirebase> getUser(String placeID, String uid){
+        //if(userLiveData == null){
+            userLiveData = new MutableLiveData<UserFirebase>();
+
+            RestaurantHelper.getTargetedUserCallback(placeID, uid, new RestaurantHelper.GetUserTargetedCallback() {
+                @Override
+                public void onSuccess(UserFirebase user) {
+                    mUser = user;
+                    userLiveData.postValue(mUser);
+                }
+
+                @Override
+                public void onError(Exception exception) {
+                    userLiveData.postValue(null);
+                }
+            });
+       // }
+        return userLiveData;
+    }
+
     public LiveData<List<UserFirebase>> getParticipantsList(String placeID) {
         if (participantsListLiveData == null) {
             participantsListLiveData = new MutableLiveData<List<UserFirebase>>();
-            RestaurantHelper.getAllUsers(placeID, new RestaurantHelper.GetUsersListCallback() {
+            RestaurantHelper.getAllUsers(placeID, new RestaurantHelper.GetAllUsersCallback() {
                 @Override
                 public void onSuccess(List<UserFirebase> list) {
                     mParticipants = list;
