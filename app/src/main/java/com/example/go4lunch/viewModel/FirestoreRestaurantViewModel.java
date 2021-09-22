@@ -30,6 +30,7 @@ public class FirestoreRestaurantViewModel extends ViewModel {
     public LiveData<List<Restaurant>> getRestaurantsList(){
         if(restaurantsListLiveData == null){
             restaurantsListLiveData = new MutableLiveData<List<Restaurant>>();
+
             RestaurantHelper.getAllRestaurants(new RestaurantHelper.GetRestaurantsListCallback() {
                 @Override
                 public void onSuccess(List<Restaurant> list) {

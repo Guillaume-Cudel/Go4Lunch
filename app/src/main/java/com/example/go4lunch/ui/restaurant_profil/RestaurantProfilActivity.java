@@ -125,14 +125,18 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel.getRestaurantsList().observe(RestaurantProfilActivity.this, new Observer<List<Restaurant>>() {
             @Override
             public void onChanged(List<Restaurant> restaurants) {
-                boolean verification = false;
-                for(Restaurant restaurant : restaurants){
-                    if(restaurant.getPlace_id().equals(placeID)){
-                        verification = true;
-                    }
-                }
-                if (!verification){
+                if(restaurants == null){
                     fRestaurantViewModel.createRestaurant(placeID);
+                }else {
+                    boolean verification = false;
+                    for (Restaurant restaurant : restaurants) {
+                        if (restaurant.getPlace_id().equals(placeID)) {
+                            verification = true;
+                        }
+                    }
+                    if (!verification) {
+                        fRestaurantViewModel.createRestaurant(placeID);
+                    }
                 }
             }
         });
@@ -185,7 +189,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             }
         });
 
-        //todo check if userParticipant is non null
+        if(userParticipant != null) {
             if (!isParticipant) {
                 fUserViewModel.updateRestaurantChoosed(userParticipant.getUid(), placeID);
                 fUserViewModel.updateRestaurantName(userParticipant.getUid(), name);
@@ -196,15 +200,15 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 updateParticipants();
                 choosedButton.setImageResource(R.drawable.ic_validated);
 
-            }else {
+            } else {
                 fUserViewModel.deleteRestaurantChoosed(userParticipant.getUid());
                 fUserViewModel.deleteRestaurantname(userParticipant.getUid());
                 fRestaurantViewModel.deleteParticipant(placeID, userParticipant.getUid());
                 //todo useful?
-                participantslist.remove(userParticipant);
                 updateParticipants();
                 choosedButton.setImageResource(R.drawable.ic_go);
             }
+        }
     }
 
 

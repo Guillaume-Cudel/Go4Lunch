@@ -25,7 +25,6 @@ public class RestaurantHelper {
     private static final String COLLECTION_USER = "usersToRestaurants";
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
-    private static final String HAVE_CHOOSED_FIELD = "haveChoosed";
 
 
     // Get the Collection Reference
@@ -57,7 +56,6 @@ public class RestaurantHelper {
         void onError(Exception exception);
     }
 
-    // todo call this to get users who have choosed this restaurant
     public static void getAllUsers(String placeID, RestaurantHelper.GetUsersListCallback callback){
         RestaurantHelper.getUsersCollection(placeID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
