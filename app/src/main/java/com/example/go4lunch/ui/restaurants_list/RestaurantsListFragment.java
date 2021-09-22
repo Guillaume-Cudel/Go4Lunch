@@ -90,7 +90,7 @@ public class RestaurantsListFragment extends Fragment {
         });
     }
 
-    // todo add method to get participantsList into profilRestaurant
+    // todo add method to get participantsList from profilRestaurant to set participants number
 
 
 

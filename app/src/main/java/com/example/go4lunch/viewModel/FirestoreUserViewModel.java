@@ -13,12 +13,8 @@ import java.util.List;
 public class FirestoreUserViewModel extends ViewModel {
 
     private MutableLiveData<List<UserFirebase>> usersListLiveData;
-    //todo remove it
-    private MutableLiveData<List<UserFirebase>> participantsListLiveData = new MutableLiveData<List<UserFirebase>>();
-    private MutableLiveData<UserFirebase> _userLiveData;
 
     private List<UserFirebase> workmates;
-    private List<UserFirebase> participants;
     private UserFirebase mUser;
 
 
@@ -47,16 +43,13 @@ public class FirestoreUserViewModel extends ViewModel {
 
 
     public LiveData<UserFirebase> getUser(String uid) {
-        /*if (_userLiveData == null) {
-            _userLiveData = new MutableLiveData<UserFirebase>();
-        }*/
+
         MutableLiveData<UserFirebase> getUserLiveData = new MutableLiveData<UserFirebase>();
         UserHelper.getUser(uid, new UserHelper.GetUserCallback() {
             @Override
             public void onSuccess(UserFirebase user) {
                 mUser = user;
                 getUserLiveData.postValue(mUser);
-                //_userLiveData.postValue(mUser);
             }
 
             @Override
@@ -66,27 +59,6 @@ public class FirestoreUserViewModel extends ViewModel {
         });
 
         return getUserLiveData;
-    }
-
-    public LiveData<List<UserFirebase>> getParticipantsListLiveData() {
-        return participantsListLiveData;
-    }
-
-    public void addToParticipantsList(UserFirebase user) {
-        participants.add(user);
-        participantsListLiveData.postValue(participants);
-
-    }
-
-    public void removeToParticipantsList(UserFirebase user) {
-        participants.remove(user);
-        participantsListLiveData.postValue(participants);
-
-    }
-
-
-    public void updateUserStatus(String uid, Boolean haveChoosed) {
-        UserHelper.updateHaveChoosed(uid, haveChoosed);
     }
 
     public void updateRestaurantChoosed(String uid, String restaurantChoosed) {

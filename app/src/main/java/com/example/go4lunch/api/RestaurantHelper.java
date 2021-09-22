@@ -11,6 +11,7 @@ import com.example.go4lunch.model.firestore.UserFirebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -56,7 +57,7 @@ public class RestaurantHelper {
         void onError(Exception exception);
     }
 
-    public static void getAllUsers(String placeID, RestaurantHelper.GetUsersListCallback callback){
+    public static void getAllUsers(String placeID, GetUsersListCallback callback){
         RestaurantHelper.getUsersCollection(placeID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -76,12 +77,29 @@ public class RestaurantHelper {
     }
 
     public interface GetRestaurantsListCallback{
-        void onSuccess(List<Restaurant> list);
+        void onSuccess(Restaurant restaurant);
 
         void onError(Exception exception);
     }
 
-    public static void getAllRestaurants(RestaurantHelper.GetRestaurantsListCallback callback){
+    public static void getTargetedRestaurant(String placeId, GetRestaurantsListCallback callback){
+        DocumentReference docRef = RestaurantHelper.getRestaurantsCollection().document(placeId);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Restaurant restaurant = new Restaurant(placeId);
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    restaurant = document.toObject(Restaurant.class);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(restaurant);
+            }
+        });
+    }
+
+    /*public static void getAllRestaurants(RestaurantHelper.GetRestaurantsListCallback callback){
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -98,7 +116,7 @@ public class RestaurantHelper {
                 callback.onSuccess(restaurants);
             }
         });
-    }
+    }*/
 
     // --- DELETE ---
     public static void deleteParticipant(String placeID, String uid) {

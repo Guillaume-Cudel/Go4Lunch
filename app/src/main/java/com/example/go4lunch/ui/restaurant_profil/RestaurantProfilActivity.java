@@ -44,12 +44,13 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
     private TextView nameText, typeText, vicinityText;
-    private ImageView restaurantPhoto,star1, star2, star3, callImage, websiteImage;
+    private ImageView restaurantPhoto, star1, star2, star3, callImage, websiteImage;
     private FloatingActionButton choosedButton;
 
     @NonNull
     private List<UserFirebase> participantslist = new ArrayList<>();
-    private UserFirebase userParticipant = null;
+    private UserFirebase mUserParticipant = null;
+    private Restaurant mRestaurant = null;
     private RecyclerView recyclerView;
     private RestaurantProfilAdapter adapter = new RestaurantProfilAdapter(participantslist, this);
     private Context context;
@@ -90,13 +91,13 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
-        addRestaurantToDatabase();
-        recoveParticipants();
+        addRestaurantToDatabase(placeID);
+        recoveParticipants(mRestaurant);
 
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickChoosedButton();
+                updateList();
             }
         });
 
@@ -105,7 +106,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         configureRecyclerView();
     }
 
-    private void configureView(){
+    private void configureView() {
         nameText = (TextView) findViewById(R.id.restaurant_title);
         typeText = (TextView) findViewById(R.id.restaurant_kind);
         vicinityText = (TextView) findViewById(R.id.restaurant_address);
@@ -121,43 +122,35 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
     }
 
-    private void addRestaurantToDatabase(){
-        fRestaurantViewModel.getRestaurantsList().observe(RestaurantProfilActivity.this, new Observer<List<Restaurant>>() {
+    private void addRestaurantToDatabase(String placeID) {
+        fRestaurantViewModel.getRestaurant(placeID).observe(RestaurantProfilActivity.this, new Observer<Restaurant>() {
             @Override
-            public void onChanged(List<Restaurant> restaurants) {
-                if(restaurants == null){
+            public void onChanged(Restaurant restaurant) {
+                if (restaurant == null) {
                     fRestaurantViewModel.createRestaurant(placeID);
-                }else {
-                    boolean verification = false;
-                    for (Restaurant restaurant : restaurants) {
-                        if (restaurant.getPlace_id().equals(placeID)) {
-                            verification = true;
-                        }
-                    }
-                    if (!verification) {
-                        fRestaurantViewModel.createRestaurant(placeID);
-                    }
                 }
             }
         });
     }
 
-    private void recoveParticipants(){
+    private void recoveParticipants(Restaurant restaurant) {
         ProgressDialog loading = ProgressDialog.show(RestaurantProfilActivity.this, "", "Recoving participants", true);
 
-        fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
-            @Override
-            public void onChanged(List<UserFirebase> participants) {
-                RestaurantProfilActivity.this.participantslist.clear();
-                RestaurantProfilActivity.this.participantslist.addAll(participants);
-                updateParticipants();
-                loading.cancel();
-            }
-        });
+        if (restaurant != null) {
+            fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
+                @Override
+                public void onChanged(List<UserFirebase> participants) {
+                    RestaurantProfilActivity.this.participantslist.clear();
+                    RestaurantProfilActivity.this.participantslist.addAll(participants);
+                    updateParticipants();
+                    loading.cancel();
+                }
+            });
+        }
     }
 
 
-    private void configureRecyclerView(){
+    private void configureRecyclerView() {
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -165,50 +158,31 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    private void updateParticipants(){
+    private void updateParticipants() {
         adapter.updateData(participantslist);
     }
 
 
-    private void onClickChoosedButton(){
-        boolean isParticipant = false;
-        for(UserFirebase user : participantslist){
-            if(user.getUid().equals(userUid)){
-                isParticipant = true;
-            }
-        }
-        updateList(isParticipant);
-    }
-
-    private void updateList(boolean isParticipant){
+    private void updateList() {
 
         Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
-                userParticipant = userFirebase;
+                mUserParticipant = userFirebase;
+
+                if (mUserParticipant == null) {
+                    fUserViewModel.updateRestaurantChoosed(mUserParticipant.getUid(), placeID);
+                    fUserViewModel.updateRestaurantName(mUserParticipant.getUid(), name);
+                    fRestaurantViewModel.createUserToRestaurant(placeID, mUserParticipant.getUid(), mUserParticipant.getUsername(), mUserParticipant.getUrlPicture());
+                    choosedButton.setImageResource(R.drawable.ic_validated);
+                } else {
+                    fUserViewModel.deleteRestaurantChoosed(mUserParticipant.getUid());
+                    fUserViewModel.deleteRestaurantname(mUserParticipant.getUid());
+                    fRestaurantViewModel.deleteParticipant(placeID, mUserParticipant.getUid());
+                    choosedButton.setImageResource(R.drawable.ic_go);
+                }
             }
         });
-
-        if(userParticipant != null) {
-            if (!isParticipant) {
-                fUserViewModel.updateRestaurantChoosed(userParticipant.getUid(), placeID);
-                fUserViewModel.updateRestaurantName(userParticipant.getUid(), name);
-                fRestaurantViewModel.createUserToRestaurant(placeID, userParticipant.getUid(), userParticipant.getUsername(), userParticipant.getUrlPicture());
-                //firestoreUserViewModel.addToParticipantsList(userParticipant);
-                //participantslist.add(userParticipant);
-                // todo useful?
-                updateParticipants();
-                choosedButton.setImageResource(R.drawable.ic_validated);
-
-            } else {
-                fUserViewModel.deleteRestaurantChoosed(userParticipant.getUid());
-                fUserViewModel.deleteRestaurantname(userParticipant.getUid());
-                fRestaurantViewModel.deleteParticipant(placeID, userParticipant.getUid());
-                //todo useful?
-                updateParticipants();
-                choosedButton.setImageResource(R.drawable.ic_go);
-            }
-        }
     }
 
 
@@ -230,7 +204,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         vicinityText.setText(vicinity);
         if (rating != null) {
             displayStarsRating();
-        }else{
+        } else {
             noDisplayStars();
         }
 
@@ -253,7 +227,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         }
     }
 
-    private void noDisplayStars(){
+    private void noDisplayStars() {
         star1.setVisibility(View.INVISIBLE);
         star2.setVisibility(View.INVISIBLE);
         star3.setVisibility(View.INVISIBLE);

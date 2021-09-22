@@ -82,7 +82,6 @@ public class UserHelper {
                 if (task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     user = document.toObject(UserFirebase.class);
-                    //callback.onSuccess(user);
                 }else{
                     callback.onError(new Exception());
                 }
