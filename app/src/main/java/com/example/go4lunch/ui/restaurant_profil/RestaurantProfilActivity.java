@@ -129,26 +129,9 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 if (mRestaurant == null) {
                     fRestaurantViewModel.createRestaurant(placeID);
                 }else{
-                    //recoveParticipants(mRestaurant);
                 }
             }
         });
-    }
-
-    private void recoveParticipants(Restaurant restaurant) {
-        //ProgressDialog loading = ProgressDialog.show(RestaurantProfilActivity.this, "", "Recoving participants", true);
-
-        if (restaurant != null) {
-            fRestaurantViewModel.getParticipantsList(placeID).observe(RestaurantProfilActivity.this, new Observer<List<UserFirebase>>() {
-                @Override
-                public void onChanged(List<UserFirebase> participants) {
-                    RestaurantProfilActivity.this.participantslist.clear();
-                    RestaurantProfilActivity.this.participantslist.addAll(participants);
-                    updateParticipants();
-                    //loading.cancel();
-                }
-            });
-        }
     }
 
     @Override
@@ -190,13 +173,33 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             }
         });
 
-        //todo add condition if user have not choosed restaurant yet
+        //todo test why i must double click to add/from user to the list
         fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
                 mParticipantUser = userFirebase;
                 if(mCurrentUser != null){
-                    if (mParticipantUser == null) {
+                    if(mCurrentUser.getRestaurantChoosed() == null){
+                        fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
+                        fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
+                        fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                        choosedButton.setImageResource(R.drawable.ic_validated);
+
+                    }else if (!mCurrentUser.getRestaurantChoosed().equals(placeID)) {
+                        fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantChoosed(), mCurrentUser.getUid());
+                        fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
+                        fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
+                        fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                        choosedButton.setImageResource(R.drawable.ic_validated);
+
+                    }else{
+                        fUserViewModel.deleteRestaurantChoosed(mCurrentUser.getUid());
+                        fUserViewModel.deleteRestaurantname(mCurrentUser.getUid());
+                        fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
+                        choosedButton.setImageResource(R.drawable.ic_go);
+                    }
+
+                    /*if (mParticipantUser == null) {
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
@@ -208,7 +211,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                         fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
                         choosedButton.setImageResource(R.drawable.ic_go);
                         updateParticipants();
-                    }
+                    }*/
                 }
             }
         });

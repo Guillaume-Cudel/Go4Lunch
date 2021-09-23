@@ -80,24 +80,6 @@ public class RestaurantHelper {
                 callback.onSuccess(users);
             }
         });
-
-        //-----------------
-       /* RestaurantHelper.getUsersCollection(placeID).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                List<UserFirebase> users = new ArrayList<>();
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                        UserFirebase user = document.toObject(UserFirebase.class);
-                        users.add(user);
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                    callback.onError(new Exception());
-                }
-                callback.onSuccess(users);
-            }
-        });*/
     }
 
     public interface GetUserTargetedCallback{

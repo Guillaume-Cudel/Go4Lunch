@@ -5,6 +5,7 @@ import static androidx.constraintlayout.motion.utils.Oscillator.TAG;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.go4lunch.model.firestore.UserFirebase;
 import com.firebase.ui.auth.data.model.User;
@@ -14,7 +15,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -75,13 +79,18 @@ public class UserHelper {
 
     public static void getUser(String uid, GetUserCallback callback){
         DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
                 UserFirebase user = new UserFirebase();
-                if (task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    user = document.toObject(UserFirebase.class);
+                if (value != null && value.exists()){
+                    //DocumentSnapshot document = (DocumentSnapshot) value.getData();
+                    user = value.toObject(UserFirebase.class);
                 }else{
                     callback.onError(new Exception());
                 }
