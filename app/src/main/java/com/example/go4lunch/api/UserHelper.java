@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -53,7 +54,23 @@ public class UserHelper {
     }
 
     public static void getAllUsers(GetUsersListCallback callback){
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        //todo change to observe in real time
+        UserHelper.getUsersCollection().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+                List<UserFirebase> users = new ArrayList<>();
+                for(QueryDocumentSnapshot doc : value){
+                    UserFirebase user = doc.toObject(UserFirebase.class);
+                    users.add(user);
+                }
+                callback.onSuccess(users);
+            }
+        });
+        /*UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 List<UserFirebase> users = new ArrayList<>();
@@ -68,7 +85,7 @@ public class UserHelper {
                 }
                 callback.onSuccess(users);
             }
-        });
+        });*/
     }
 
     public interface GetUserCallback{

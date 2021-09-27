@@ -10,8 +10,9 @@ public class UserFirebase {
     private Boolean haveChoosed;
     @Nullable
     private String urlPicture;
-    private String restaurantChoosed;
+    private String restaurantID;
     private String restaurantName;
+
 
     public UserFirebase() { }
 
@@ -22,7 +23,7 @@ public class UserFirebase {
         this.urlPicture = urlPicture;
         this.haveChoosed = false;
         this.restaurantName = null;
-        this.restaurantChoosed = null;
+        this.restaurantID = null;
     }
 
     // --- GETTERS ---
@@ -31,7 +32,7 @@ public class UserFirebase {
     @Nullable
     public String getUrlPicture() { return urlPicture; }
     public Boolean getHaveChoosed() { return haveChoosed; }
-    public String getRestaurantChoosed() { return restaurantChoosed; }
+    public String getRestaurantID() { return restaurantID; }
     public String getRestaurantName() { return restaurantName; }
 
 }

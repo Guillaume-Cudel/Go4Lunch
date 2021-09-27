@@ -42,14 +42,14 @@ import java.util.List;
 public class RestaurantProfilActivity extends AppCompatActivity {
 
     private String placeID, photoReference, photoWidth, name, vicinity, type, rating, phoneNum, websiteURL;
-    private TextView nameText, typeText, vicinityText;
-    private ImageView restaurantPhoto, star1, star2, star3, callImage, websiteImage;
+    private TextView nameText, typeText, vicinityText, likeText;
+    private ImageView restaurantPhoto, star1, star2, star3, callImage, likeImage, websiteImage;
     private FloatingActionButton choosedButton;
 
     @NonNull
     private List<UserFirebase> participantslist = new ArrayList<>();
     private UserFirebase mCurrentUser = null;
-    private UserFirebase mParticipantUser = null;
+
     private Restaurant mRestaurant = null;
     private RecyclerView recyclerView;
     private RestaurantProfilAdapter adapter = new RestaurantProfilAdapter(participantslist, this);
@@ -100,9 +100,34 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             }
         });
 
+        likeImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateLike();
+            }
+        });
+
         phoneRestaurant();
         onClickWebsite();
         configureRecyclerView();
+    }
+
+    private void updateLike() {
+        //todo to test
+        fRestaurantViewModel.getUserRestaurantLiked(placeID, mCurrentUser.getUid()).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                if(userFirebase == null){
+                    fRestaurantViewModel.createUserRestaurantLiked(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                    likeImage.setImageResource(R.drawable.ic_baseline_star_rate);
+                    likeText.setText(R.string.likeTextRestaurantProfilValidate);
+                }else{
+                    fRestaurantViewModel.deleteUserLiked(placeID, mCurrentUser.getUid());
+                    likeImage.setImageResource(R.drawable.ic_baseline_star_border);
+                    likeText.setText(R.string.likeTextRestaurantProfilInvalidate);
+                }
+            }
+        });
     }
 
     private void configureView() {
@@ -114,6 +139,8 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         star2 = (ImageView) findViewById(R.id.restaurant_star_2);
         star3 = (ImageView) findViewById(R.id.restaurant_star_3);
         callImage = (ImageView) findViewById(R.id.call_image);
+        likeImage = (ImageView) findViewById(R.id.like_image);
+        likeText = (TextView) findViewById(R.id.like_text);
         websiteImage = (ImageView) findViewById(R.id.website_image);
         choosedButton = findViewById(R.id.restaurant_choice_button);
         recyclerView = (RecyclerView) findViewById(R.id.profil_restaurant_recyclerView);
@@ -127,8 +154,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             public void onChanged(Restaurant restaurant) {
                 mRestaurant = restaurant;
                 if (mRestaurant == null) {
-                    fRestaurantViewModel.createRestaurant(placeID);
-                }else{
+                    fRestaurantViewModel.createRestaurant(placeID, photoReference, photoWidth, name, vicinity, type, rating);
                 }
             }
         });
@@ -173,20 +199,18 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             }
         });
 
-        //todo test why i must double click to add/from user to the list
         fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
-                mParticipantUser = userFirebase;
                 if(mCurrentUser != null){
-                    if(mCurrentUser.getRestaurantChoosed() == null){
+                    if(mCurrentUser.getRestaurantID() == null){
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
                         choosedButton.setImageResource(R.drawable.ic_validated);
 
-                    }else if (!mCurrentUser.getRestaurantChoosed().equals(placeID)) {
-                        fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantChoosed(), mCurrentUser.getUid());
+                    }else if (!mCurrentUser.getRestaurantID().equals(placeID)) {
+                        fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantID(), mCurrentUser.getUid());
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
@@ -198,20 +222,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                         fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
                         choosedButton.setImageResource(R.drawable.ic_go);
                     }
-
-                    /*if (mParticipantUser == null) {
-                        fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
-                        fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
-                        fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
-                        choosedButton.setImageResource(R.drawable.ic_validated);
-                        updateParticipants();
-                    } else {
-                        fUserViewModel.deleteRestaurantChoosed(mCurrentUser.getUid());
-                        fUserViewModel.deleteRestaurantname(mCurrentUser.getUid());
-                        fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
-                        choosedButton.setImageResource(R.drawable.ic_go);
-                        updateParticipants();
-                    }*/
                 }
             }
         });

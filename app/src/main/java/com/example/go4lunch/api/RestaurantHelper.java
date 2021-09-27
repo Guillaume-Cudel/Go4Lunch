@@ -9,7 +9,6 @@ import androidx.annotation.Nullable;
 
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -27,10 +26,10 @@ import java.util.List;
 public class RestaurantHelper {
 
     private static final String COLLECTION_RESTAURANT = "restaurants";
-    private static final String COLLECTION_RESTAURANT_LIKED = "restaurantsLiked";
+    private static final String COLLECTION_RESTAURANT_LIKED = "usersRestaurantLiked";
     private static final String COLLECTION_USER = "usersToRestaurants";
-    private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
-    private static final String RESTAURANT_NAME_FIELD = "restaurantName";
+    private static final String PARTICIPANTS_NUMBER = "participantsNumber";
+
 
 
     // Get the Collection Reference
@@ -42,16 +41,26 @@ public class RestaurantHelper {
         return getRestaurantsCollection().document(placeID).collection(COLLECTION_USER);
     }
 
+    public static CollectionReference getUsersRestaurantLikedCollection(String placeID){
+        return getRestaurantsCollection().document(placeID).collection(COLLECTION_RESTAURANT_LIKED);
+    }
+
     // --- CREATE ---
 
-    public static void createRestaurant(String placeID) {
-        Restaurant restaurantToCreate = new Restaurant(placeID);
+    public static void createRestaurant(String placeID, String photoReference, String photoWidth, String name,
+                                        String vicinity, String type, String rating) {
+        Restaurant restaurantToCreate = new Restaurant(placeID, photoReference, photoWidth, name, vicinity, type, rating);
         RestaurantHelper.getRestaurantsCollection().document(placeID).set(restaurantToCreate);
     }
 
-    public static void createUser(String placeID, String uid, String username, String urlPicture) {
+    public static void createRestaurantUser(String placeID, String uid, String username, String urlPicture) {
         UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
         RestaurantHelper.getUsersCollection(placeID).document(uid).set(userToCreate);
+    }
+
+    public static void createRestaurantLikedUser(String placeID, String uid, String username, String urlPicture){
+        UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
+        RestaurantHelper.getUsersRestaurantLikedCollection(placeID).document(uid).set(userToCreate);
     }
 
     // -------- GET ----------
@@ -128,10 +137,43 @@ public class RestaurantHelper {
         });
     }
 
+    public interface GetUserRestaurantLikedCallback{
+        void onSuccess(UserFirebase user);
+
+        void onError(Exception exception);
+    }
+
+    public static void getUserRestaurantLiked(String placeID, String uid, GetUserRestaurantLikedCallback callback){
+        DocumentReference docRef = RestaurantHelper.getUsersRestaurantLikedCollection(placeID).document(uid);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                UserFirebase user = new UserFirebase();
+                if (task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    user = document.toObject(UserFirebase.class);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(user);
+            }
+        });
+    }
+
+    // --- UPDATE ---
+
+    public static void updateParticipantsNumber(String placeID, int participantsNumber){
+        RestaurantHelper.getRestaurantsCollection().document(placeID).update(PARTICIPANTS_NUMBER, participantsNumber);
+    }
+
 
     // --- DELETE ---
     public static void deleteParticipant(String placeID, String uid) {
         RestaurantHelper.getUsersCollection(placeID).document(uid).delete();
+    }
+
+    public static void deleteUserRestaurantLiked(String placeID, String uid){
+        RestaurantHelper.getUsersRestaurantLikedCollection(placeID).document(uid).delete();
     }
 
 

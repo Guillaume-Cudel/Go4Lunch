@@ -24,6 +24,8 @@ import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.requests.Photos;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.w3c.dom.Text;
+
 import java.util.Calendar;
 import java.util.List;
 
@@ -90,6 +92,14 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             holder.displayStarsRating();
         }else{
             holder.noDisplayStars();
+        }
+
+        if(restaurant.getParticipantsNumber() > 0){
+            // todo check if i must add 1 to participantNumber
+            int participants = restaurant.getParticipantsNumber();
+            String intConvert = String.valueOf(participants);
+            String participantsText = "(" + intConvert + ")";
+            holder.participantsField.setText(participantsText);
         }
 
         String distance = getDistanceInMeters() + " m";
@@ -159,6 +169,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         private final TextView informationField;
         private final TextView openingTime;
         private final TextView distanceField;
+        private final TextView participantsField;
         private final ImageView noteField1;
         private final ImageView noteField2;
         private final ImageView noteField3;
@@ -174,6 +185,7 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             informationField = mView.findViewById(R.id.list_view_informations);
             openingTime = mView.findViewById(R.id.list_view_opening_time);
             distanceField = mView.findViewById(R.id.list_view_distance);
+            participantsField = mView.findViewById(R.id.list_view_number_workmates);
             noteField1 = mView.findViewById(R.id.list_view_star_1);
             noteField2 = mView.findViewById(R.id.list_view_star_2);
             noteField3 = mView.findViewById(R.id.list_view_star_3);

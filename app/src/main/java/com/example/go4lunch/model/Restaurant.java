@@ -35,14 +35,12 @@ public class Restaurant {
     @SerializedName("place_id")
     @Expose
     private String place_id;
+    private int participantsNumber;
     private Details details;
+    private String photoReference, photoWidth, type;
 
     public Restaurant(){
 
-    }
-
-    public Restaurant(String placeID){
-        this.place_id = placeID;
     }
 
     public Restaurant(String name, String vicinity, OpeningHours opening_hours, Geometry geometry,
@@ -55,6 +53,17 @@ public class Restaurant {
         this.rating = rating;
         this.photos = photos;
         this.types = types;
+    }
+
+    public Restaurant(String placeID, String photoReference, String photoWidth, String name,
+                      String vicinity, String type, String rating){
+        this.place_id = placeID;
+        this.photoReference = photoReference;
+        this.photoWidth = photoWidth;
+        this.name = name;
+        this. vicinity = vicinity;
+        this.type = type;
+        this.rating = rating;
     }
 
     public String getName() {
@@ -91,6 +100,22 @@ public class Restaurant {
 
     public Details getDetails() {
         return details;
+    }
+
+    public int getParticipantsNumber() {
+        return participantsNumber;
+    }
+
+    public String getPhotoReference() {
+        return photoReference;
+    }
+
+    public String getPhotoWidth() {
+        return photoWidth;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public void setDetails(Details details) {

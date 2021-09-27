@@ -17,6 +17,7 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.model.firestore.UserFirebase;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -56,15 +57,16 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
         String username = user.getUsername();
 
 
-        boolean choosed = user.getHaveChoosed();
-        if(choosed){
-            String restaurantName = user.getRestaurantName();
+        String restaurantName = user.getRestaurantName();
+        if(restaurantName != null){
+
             if (restaurantName.length() > 20){
                 restaurantName = restaurantName.substring(0, 20);
             }
-            //todo add other textView below username to display the restaurant choosed
-            String restaurantChoosed = username + " is eating. (" + restaurantName + ")";
-            holder.usernameText.setText(restaurantChoosed);
+            String workmateEating = username + " is eating.";
+            String restaurantText = "(" + restaurantName + ")";
+            holder.usernameText.setText(workmateEating);
+            holder.restaurantText.setText(restaurantText);
         }else {
             String restaurantLess = username + " hasn't decided yet.";
             holder.usernameText.setText(restaurantLess);
@@ -90,6 +92,7 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
 
         public final View mView;
         private final TextView usernameText;
+        private final TextView restaurantText;
         private final ImageView userPhoto;
 
 
@@ -99,6 +102,7 @@ public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesAdapter.Work
             mView = itemView;
 
             usernameText = mView.findViewById(R.id.workmate_text_item);
+            restaurantText = mView.findViewById(R.id.restaurant_text_item);
             userPhoto = mView.findViewById(R.id.workmate_image_item);
         }
     }

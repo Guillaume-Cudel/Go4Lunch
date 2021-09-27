@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -21,16 +22,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.di.Injection;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.model.requests.Photos;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
+import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
 import com.example.go4lunch.ui.restaurants_list.RestaurantsListFragment;
 import com.example.go4lunch.ui.workmates.WorkmatesFragment;
+import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
 import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -45,6 +51,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 
+import java.util.List;
+
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -54,7 +62,13 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private BottomNavigationView mBottomNavigationView;
     private LocationViewModel locationViewModel;
     private FirestoreUserViewModel firestoreUserViewModel;
+    private FirestoreRestaurantViewModel firestoreRestaurantViewModel;
     private LocationCallback locationCallback;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser authUser = mAuth.getCurrentUser();
+    private String userUid = authUser.getUid();
+    private UserFirebase mCurrentUser;
+    private Restaurant mRestaurant;
 
     public Fragment fragmentMap;
     public Fragment fragmentRestaurantsList;
@@ -66,7 +80,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
-    private UserFirebase mUser;
 
 
     @Override
@@ -86,10 +99,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         locationViewModel = Injection.provideLocationViewModel(this);
         firestoreUserViewModel = Injection.provideFirestoreUserViewModel(this);
+        firestoreRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
 
-        /*if(mUser == null){
-            recoveUser();
-        }*/
 
         // Show the first fragment when starting activity
         fragmentMap = new MapFragment();
@@ -180,6 +191,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
         switch (id) {
             case R.id.nav_your_lunch:
+                showRestaurantChoosed();
                 break;
             case R.id.nav_settings:
                 break;
@@ -342,6 +354,45 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private void stopLocationUpdates(LocationCallback locationCallback) {
         LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
 
+    }
+
+    private void recoveCurrentUserData() {
+        firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                mCurrentUser = userFirebase;
+            }
+        });
+    }
+
+    private void recoveRestaurantChoosed() {
+        recoveCurrentUserData();
+
+        if (mCurrentUser != null) {
+            String placeID = mCurrentUser.getRestaurantID();
+            firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
+                @Override
+                public void onChanged(Restaurant restaurant) {
+                    mRestaurant = restaurant;
+                }
+            });
+        }
+    }
+
+    private void showRestaurantChoosed() {
+        recoveRestaurantChoosed();
+
+        if (mRestaurant != null) {
+            Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
+            i.putExtra("place_id", mRestaurant.getPlace_id());
+            i.putExtra("name", mRestaurant.getName());
+            i.putExtra("photo", mRestaurant.getPhotoReference());
+            i.putExtra("photoWidth", mRestaurant.getPhotoWidth());
+            i.putExtra("vicinity", mRestaurant.getVicinity());
+            i.putExtra("type", mRestaurant.getType());
+            i.putExtra("rate", mRestaurant.getRating());
+            startActivity(i);
+        }
     }
 
 }

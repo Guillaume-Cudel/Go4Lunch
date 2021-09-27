@@ -18,6 +18,8 @@ import com.example.go4lunch.R;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
 import com.example.go4lunch.model.Restaurant;
+import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -34,6 +36,7 @@ public class RestaurantsListFragment extends Fragment {
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
     private LatLng mLatlng;
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
+    private FirestoreRestaurantViewModel mFirestoreRestaurantVM;
 
 
     public RestaurantsListFragment( ) {
@@ -46,6 +49,8 @@ public class RestaurantsListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mFirestoreRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
 
         recoveLocation();
 
@@ -61,6 +66,7 @@ public class RestaurantsListFragment extends Fragment {
             public void onChanged(List<Restaurant> restaurantsList) {
                 RestaurantsListFragment.this.restaurantsList.clear();
                 RestaurantsListFragment.this.restaurantsList.addAll(restaurantsList);
+                recoveParticipants();
                 updateRestaurants();
             }
         });
@@ -90,7 +96,21 @@ public class RestaurantsListFragment extends Fragment {
         });
     }
 
-    // todo add method to get participantsList from profilRestaurant to set participants number
+    private void recoveParticipants(){
+        if(restaurantsList.size() > 0){
+            for(Restaurant restaurant : restaurantsList){
+
+                mFirestoreRestaurantVM.getParticipantsList(restaurant.getPlace_id()).observe(requireActivity(),
+                new Observer<List<UserFirebase>>() {
+                    @Override
+                    public void onChanged(List<UserFirebase> userFirebases) {
+                        int participantsNumber = userFirebases.size();
+                        mFirestoreRestaurantVM.updateParticipantsNumber(restaurant.getPlace_id(), participantsNumber);
+                    }
+                });
+            }
+        }
+    }
 
 
 

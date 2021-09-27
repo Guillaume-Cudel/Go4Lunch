@@ -13,6 +13,7 @@ import java.util.List;
 public class RestaurantViewModel extends ViewModel {
 
     private static final String API_KEY = "AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
+    //todo change radius from profil settings?
     private static final String RADIUS = "1000";
     private static final String TYPE = "restaurant";
     private static final String FIELDS = "formatted_phone_number,opening_hours,website";
