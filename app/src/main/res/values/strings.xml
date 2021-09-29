@@ -28,5 +28,8 @@
     <string name="error_unknown_error"> A unknow error has appeared</string>
     <string name="likeTextRestaurantProfilValidate">You like</string>
     <string name="likeTextRestaurantProfilInvalidate">Like</string>
+    <string name="messageRecovingRestaurants">Recoving restaurants</string>
+    <string name="messageRecoveWorkmates">Recoving workmates</string>
+    <string name="NavigationChooseRestaurant">Please, choose a restaurant.</string>
 
 </resources>

@@ -30,7 +30,6 @@ public class UserHelper {
     private static final String COLLECTION_NAME = "users";
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
-    private static final String HAVE_CHOOSED_FIELD = "haveChoosed";
 
 
     // Get the Collection Reference
@@ -70,22 +69,6 @@ public class UserHelper {
                 callback.onSuccess(users);
             }
         });
-        /*UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                List<UserFirebase> users = new ArrayList<>();
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                        UserFirebase user = document.toObject(UserFirebase.class);
-                        users.add(user);
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                    callback.onError(new Exception());
-                }
-                callback.onSuccess(users);
-            }
-        });*/
     }
 
     public interface GetUserCallback{
@@ -119,11 +102,6 @@ public class UserHelper {
 
     // --- UPDATE ---
 
-
-    // todo remove boolean
-    public static void updateHaveChoosed(String uid, Boolean haveChoosed) {
-        UserHelper.getUsersCollection().document(uid).update(HAVE_CHOOSED_FIELD, haveChoosed);
-    }
 
     public static void updateRestaurantChoosed(String uid, String restaurantChoosed){
         UserHelper.getUsersCollection().document(uid).update(RESTAURANT_CHOOSED_FIELD, restaurantChoosed);

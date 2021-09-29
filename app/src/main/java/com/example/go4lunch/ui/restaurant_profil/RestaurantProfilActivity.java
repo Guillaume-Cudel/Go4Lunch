@@ -81,7 +81,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 .observe(this, new Observer<Details>() {
                     @Override
                     public void onChanged(Details details) {
-                        //mDetails = details;
                         if (details.getFormatted_phone_number() != null) {
                             phoneNum = details.getFormatted_phone_number();
                         }
@@ -91,7 +90,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
-        addRestaurantToDatabase(placeID);
+        //addRestaurantToDatabase(placeID);
 
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +113,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private void updateLike() {
         //todo to test
-        fRestaurantViewModel.getUserRestaurantLiked(placeID, mCurrentUser.getUid()).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
+        fRestaurantViewModel.getUserRestaurantLiked(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
                 if(userFirebase == null){
@@ -148,7 +147,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
     }
 
-    private void addRestaurantToDatabase(String placeID) {
+    /*private void addRestaurantToDatabase(String placeID) {
         fRestaurantViewModel.getRestaurant(placeID).observe(RestaurantProfilActivity.this, new Observer<Restaurant>() {
             @Override
             public void onChanged(Restaurant restaurant) {
@@ -158,7 +157,7 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    }*/
 
     @Override
     protected void onResume() {
@@ -202,24 +201,32 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
+                //todo test it
                 if(mCurrentUser != null){
-                    if(mCurrentUser.getRestaurantID() == null){
+                    boolean addParticipant;
+                    if(mCurrentUser.getRestaurantChoosed() == null){
+                        addParticipant = true;
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                        fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
                         choosedButton.setImageResource(R.drawable.ic_validated);
 
-                    }else if (!mCurrentUser.getRestaurantID().equals(placeID)) {
-                        fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantID(), mCurrentUser.getUid());
+                    }else if (!mCurrentUser.getRestaurantChoosed().equals(placeID)) {
+                        addParticipant = true;
+                        fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantChoosed(), mCurrentUser.getUid());
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
+                        fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
                         choosedButton.setImageResource(R.drawable.ic_validated);
 
                     }else{
+                        addParticipant = false;
                         fUserViewModel.deleteRestaurantChoosed(mCurrentUser.getUid());
                         fUserViewModel.deleteRestaurantname(mCurrentUser.getUid());
                         fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
+                        fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
                         choosedButton.setImageResource(R.drawable.ic_go);
                     }
                 }

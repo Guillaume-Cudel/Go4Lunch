@@ -1,5 +1,6 @@
 package com.example.go4lunch.ui.restaurants_list;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,9 +35,11 @@ public class RestaurantsListFragment extends Fragment {
     private RecyclerView recyclerView;
     @NonNull
     private final ArrayList<Restaurant> restaurantsList = new ArrayList<>();
+    private ArrayList<Restaurant> restaurantsListSaved = new ArrayList<>();
     private LatLng mLatlng;
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
     private FirestoreRestaurantViewModel mFirestoreRestaurantVM;
+    private ProgressDialog loading;
 
 
     public RestaurantsListFragment( ) {
@@ -50,6 +53,7 @@ public class RestaurantsListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        loading = ProgressDialog.show(getActivity(), "", getString(R.string.messageRecovingRestaurants), true);
         mFirestoreRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
 
         recoveLocation();
@@ -61,6 +65,7 @@ public class RestaurantsListFragment extends Fragment {
         Log.d("localisation", locationText);
 
 
+        //todo observe my database and not google database
         Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
             @Override
             public void onChanged(List<Restaurant> restaurantsList) {
@@ -68,6 +73,7 @@ public class RestaurantsListFragment extends Fragment {
                 RestaurantsListFragment.this.restaurantsList.addAll(restaurantsList);
                 recoveParticipants();
                 updateRestaurants();
+                loading.cancel();
             }
         });
         configureRecyclerView();
@@ -104,11 +110,16 @@ public class RestaurantsListFragment extends Fragment {
                 new Observer<List<UserFirebase>>() {
                     @Override
                     public void onChanged(List<UserFirebase> userFirebases) {
-                        int participantsNumber = userFirebases.size();
-                        mFirestoreRestaurantVM.updateParticipantsNumber(restaurant.getPlace_id(), participantsNumber);
+                        //todo not work
+                        if (userFirebases.size() > 0) {
+                            int participantsNumber = userFirebases.size();
+                            mFirestoreRestaurantVM.updateParticipantsNumber(restaurant.getPlace_id(), participantsNumber);
+                            updateRestaurants();
+                        }
                     }
                 });
             }
+
         }
     }
 

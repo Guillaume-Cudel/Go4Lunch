@@ -30,7 +30,7 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         RestaurantHelper.createRestaurantUser(placeID, uid, username, urlPicture);
     }
 
-    //todo finish it
+    //todo test it
     public void createUserRestaurantLiked(String placeID, String uid, String username, String urlPicture){
         RestaurantHelper.createRestaurantLikedUser(placeID, uid, username, urlPicture);
     }
@@ -110,9 +110,12 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         return userLikedLiveData;
     }
 
-    public void updateParticipantsNumber(String placeID, int participantsNumber){
-        RestaurantHelper.updateParticipantsNumber(placeID, participantsNumber);
+    public void  updateParticipantNumber(String placeID, boolean addParticipant){
+        RestaurantHelper.updateParticipantNumber(placeID, addParticipant);
     }
+    /*public void updateParticipantsNumber(String placeID, int participantsNumber){
+        RestaurantHelper.updateParticipantsNumber(placeID, participantsNumber);
+    }*/
 
     public void deleteParticipant(String placeID, String uid) {
         RestaurantHelper.deleteParticipant(placeID, uid);

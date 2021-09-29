@@ -49,7 +49,7 @@ public class WorkmatesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
+        ProgressDialog loading = ProgressDialog.show(getActivity(), "", getString(R.string.messageRecoveWorkmates), true);
 
         Injection.provideFirestoreUserViewModel(getActivity()).getWorkmatesList().observe(this.getActivity(), new Observer<List<UserFirebase>>() {
             @Override
@@ -61,8 +61,6 @@ public class WorkmatesFragment extends Fragment {
             }
         });
         configureRecyclerView();
-
-        //initList();
     }
 
 
@@ -77,27 +75,5 @@ public class WorkmatesFragment extends Fragment {
         adapter.updateData(workmatesList);
     }
 
-
-    /*private void initList(){
-        ProgressDialog loading = ProgressDialog.show(getActivity(), "", "Recoving workmates", true);
-        CollectionReference userCollection = UserHelper.getUsersCollection();
-        userCollection.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                        UserFirebase user = document.toObject(UserFirebase.class);
-                        workmatesList.add(user);
-                        adapter = new WorkmatesAdapter(workmatesList, getActivity());
-                        recyclerView.setAdapter(adapter);
-                        loading.cancel();
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                }
-            }
-        });
-
-    }*/
 
 }

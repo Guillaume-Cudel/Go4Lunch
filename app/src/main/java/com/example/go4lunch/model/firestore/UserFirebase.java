@@ -7,10 +7,9 @@ public class UserFirebase {
     private String uid;
     private String username;
     //todo remove boolean
-    private Boolean haveChoosed;
     @Nullable
     private String urlPicture;
-    private String restaurantID;
+    private String restaurantChoosed;
     private String restaurantName;
 
 
@@ -21,9 +20,8 @@ public class UserFirebase {
         this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;
-        this.haveChoosed = false;
         this.restaurantName = null;
-        this.restaurantID = null;
+        this.restaurantChoosed = null;
     }
 
     // --- GETTERS ---
@@ -31,8 +29,7 @@ public class UserFirebase {
     public String getUsername() { return username; }
     @Nullable
     public String getUrlPicture() { return urlPicture; }
-    public Boolean getHaveChoosed() { return haveChoosed; }
-    public String getRestaurantID() { return restaurantID; }
+    public String getRestaurantChoosed() { return restaurantChoosed; }
     public String getRestaurantName() { return restaurantName; }
 
 }

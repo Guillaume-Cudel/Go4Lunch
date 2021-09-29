@@ -1,6 +1,7 @@
 package com.example.go4lunch.ui.map;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,6 +29,7 @@ import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.requests.Photos;
+import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,6 +54,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private SupportMapFragment mapFragment;
     private GoogleMap map;
     private List<Restaurant> restaurantsList = new ArrayList<>();
+    private Restaurant mRestaurant;
+    private FirestoreRestaurantViewModel mFirebaseRestaurantVM;
+    private ProgressDialog loading;
 
 
     public static MapFragment newInstance() {
@@ -71,7 +76,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     public void onViewCreated(@NonNull @NotNull View view, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        loading = ProgressDialog.show(getActivity(), "", getString(R.string.messageRecovingRestaurants), true);
+
         initLocationviewModel();
+        mFirebaseRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
 
         mapFragment = SupportMapFragment.newInstance();
         mapFragment.getMapAsync(this);
@@ -150,10 +158,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             double rLongitude = Double.parseDouble(restaurantLongitude);
                             LatLng restaurantLocation = new LatLng(rLatitude, rLongitude);
                             String infoRate;
+                            String rate = null;
+                            String photoData = null;
+                            String photoWidth = null;
                             if (restaurant.getRating() != null){
                                 infoRate = "Rate: " + restaurant.getRating();
+                                rate = restaurant.getRating();
                             }else
                                 infoRate = "No rating";
+
+                            if(restaurant.getPhotos() != null) {
+                                List<Photos> photoInformation = restaurant.getPhotos();
+                                photoData = photoInformation.get(0).getPhotoReference();
+                                photoWidth = photoInformation.get(0).getWidth();
+                            }
+
+                            //todo add details informations to firestore database
+                            addRestaurantToDatabase(restaurant.getPlace_id(), photoData, photoWidth, title, restaurant.getVicinity(),
+                                    restaurant.getTypes().get(0), rate);
 
                             Bitmap bitmap = getBitmapFromVectorDrawable(getContext(),R.drawable.ic_restaurant_red);
                             BitmapDescriptor descriptor =BitmapDescriptorFactory.fromBitmap(bitmap);
@@ -166,6 +188,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             );
                             restaurantMarker.setTag(restaurant);
                         }
+                        loading.cancel();
                     }
                 });
     }
@@ -235,5 +258,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    private void addRestaurantToDatabase(String placeID, String photoReference, String photoWidth, String name,
+                                         String vicinity, String type, String rating) {
+
+        mFirebaseRestaurantVM.getRestaurant(placeID).observe(requireActivity(), new Observer<Restaurant>() {
+            @Override
+            public void onChanged(Restaurant restaurant) {
+                mRestaurant = restaurant;
+                if (mRestaurant == null) {
+                    mFirebaseRestaurantVM.createRestaurant(placeID, photoReference, photoWidth, name,
+                            vicinity, type, rating);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        //todo regarder la doc de map pour nettoyer le changement ecran
+        //mapFragment.
     }
 }

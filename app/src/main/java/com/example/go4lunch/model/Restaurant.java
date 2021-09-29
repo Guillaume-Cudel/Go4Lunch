@@ -61,9 +61,14 @@ public class Restaurant {
         this.photoReference = photoReference;
         this.photoWidth = photoWidth;
         this.name = name;
-        this. vicinity = vicinity;
+        this.vicinity = vicinity;
         this.type = type;
         this.rating = rating;
+    }
+
+    public Restaurant(String placeID, int participantsNumber){
+        this.place_id = placeID;
+        this.participantsNumber = participantsNumber;
     }
 
     public String getName() {

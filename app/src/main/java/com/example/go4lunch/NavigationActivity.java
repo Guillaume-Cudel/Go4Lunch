@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -20,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
@@ -30,7 +30,6 @@ import com.example.go4lunch.databinding.ActivityNavigationBinding;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
-import com.example.go4lunch.model.requests.Photos;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.ui.map.MapFragment;
 import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
@@ -50,8 +49,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-
-import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -300,9 +297,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
 
-            ProgressDialog loading = ProgressDialog.show(this, "",
-                    "Recoving location", true);
-
             LocationRequest locationRequest = LocationRequest.create();
             locationRequest.setInterval(10000);
             locationRequest.setFastestInterval(2000);
@@ -330,11 +324,9 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 public void onSuccess(Location location) {
                     if (location == null) {
                         startLocationUpdates(locationRequest, locationCallback);
-                        loading.cancel();
                     }
                     if (location != null) {
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
-                        loading.cancel();
                         stopLocationUpdates(locationCallback);
                     }
                 }
@@ -366,23 +358,61 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     }
 
     private void recoveRestaurantChoosed() {
-        recoveCurrentUserData();
+        //recoveCurrentUserData();
 
         if (mCurrentUser != null) {
-            String placeID = mCurrentUser.getRestaurantID();
-            firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
-                @Override
-                public void onChanged(Restaurant restaurant) {
-                    mRestaurant = restaurant;
-                }
-            });
+            if (mCurrentUser.getRestaurantChoosed() != null) {
+                String placeID = mCurrentUser.getRestaurantChoosed();
+                firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
+                    @Override
+                    public void onChanged(Restaurant restaurant) {
+                        mRestaurant = restaurant;
+                    }
+                });
+            }else{
+                Toast.makeText(NavigationActivity.this, R.string.NavigationChooseRestaurant, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
     private void showRestaurantChoosed() {
-        recoveRestaurantChoosed();
+        //todo put the restaurant choosed in collection of current user and get it
+        //recoveRestaurantChoosed();
 
-        if (mRestaurant != null) {
+        firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                mCurrentUser = userFirebase;
+            }
+        });
+
+        if (mCurrentUser != null) {
+            if (mCurrentUser.getRestaurantChoosed() != null) {
+                String placeID = mCurrentUser.getRestaurantChoosed();
+                firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
+                    @Override
+                    public void onChanged(Restaurant restaurant) {
+                        mRestaurant = restaurant;
+                    }
+                });
+            }else{
+                Toast.makeText(NavigationActivity.this, R.string.NavigationChooseRestaurant, Toast.LENGTH_LONG).show();
+            }
+
+            if (mRestaurant != null) {
+                Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
+                i.putExtra("place_id", mRestaurant.getPlace_id());
+                i.putExtra("name", mRestaurant.getName());
+                i.putExtra("photo", mRestaurant.getPhotoReference());
+                i.putExtra("photoWidth", mRestaurant.getPhotoWidth());
+                i.putExtra("vicinity", mRestaurant.getVicinity());
+                i.putExtra("type", mRestaurant.getType());
+                i.putExtra("rate", mRestaurant.getRating());
+                startActivity(i);
+            }
+        }
+
+        /*if (mRestaurant != null) {
             Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
             i.putExtra("place_id", mRestaurant.getPlace_id());
             i.putExtra("name", mRestaurant.getName());
@@ -392,7 +422,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             i.putExtra("type", mRestaurant.getType());
             i.putExtra("rate", mRestaurant.getRating());
             startActivity(i);
-        }
+        }*/
+        //todo add toast if restaurant.getRestauID is null
     }
 
 }

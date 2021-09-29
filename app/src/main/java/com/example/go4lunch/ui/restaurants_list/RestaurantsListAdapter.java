@@ -95,12 +95,12 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         }
 
         if(restaurant.getParticipantsNumber() > 0){
-            // todo check if i must add 1 to participantNumber
             int participants = restaurant.getParticipantsNumber();
             String intConvert = String.valueOf(participants);
             String participantsText = "(" + intConvert + ")";
             holder.participantsField.setText(participantsText);
         }
+        
 
         String distance = getDistanceInMeters() + " m";
         holder.distanceField.setText(distance);

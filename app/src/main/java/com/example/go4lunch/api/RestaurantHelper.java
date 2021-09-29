@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -19,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +58,12 @@ public class RestaurantHelper {
 
     public static void createRestaurantUser(String placeID, String uid, String username, String urlPicture) {
         UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
-        RestaurantHelper.getUsersCollection(placeID).document(uid).set(userToCreate);
+        RestaurantHelper.getUsersCollection(placeID).document(uid).set(userToCreate).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.d(TAG, "onComplete !!!");
+            }
+        });
     }
 
     public static void createRestaurantLikedUser(String placeID, String uid, String username, String urlPicture){
@@ -162,10 +170,41 @@ public class RestaurantHelper {
 
     // --- UPDATE ---
 
-    public static void updateParticipantsNumber(String placeID, int participantsNumber){
+    /*public static void updateParticipantsNumber(String placeID, int participantsNumber){
         RestaurantHelper.getRestaurantsCollection().document(placeID).update(PARTICIPANTS_NUMBER, participantsNumber);
-    }
+    }*/
 
+    public static void updateParticipantNumber(String placeID, boolean addParticipant){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = RestaurantHelper.getRestaurantsCollection().document(placeID);
+        db.runTransaction(new Transaction.Function<Void>() {
+            @Nullable
+            @Override
+            public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                DocumentSnapshot snapshot = transaction.get(docRef);
+                if(addParticipant) {
+                    double newParticipantNumber = snapshot.getDouble(PARTICIPANTS_NUMBER) +1;
+                    transaction.update(docRef, PARTICIPANTS_NUMBER, newParticipantNumber);
+                }else{
+                    double newParticipantNumber = snapshot.getDouble(PARTICIPANTS_NUMBER) -1;
+                    transaction.update(docRef, PARTICIPANTS_NUMBER, newParticipantNumber);
+                }
+                return null;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Transaction success!");
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Transaction failure.", e);
+                    }
+                });
+
+    }
 
     // --- DELETE ---
     public static void deleteParticipant(String placeID, String uid) {
