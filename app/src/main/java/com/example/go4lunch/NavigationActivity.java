@@ -348,6 +348,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     }
 
+    //------------------------
+
     private void recoveCurrentUserData() {
         firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
             @Override

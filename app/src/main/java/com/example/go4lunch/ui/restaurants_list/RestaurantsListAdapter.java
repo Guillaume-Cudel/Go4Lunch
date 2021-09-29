@@ -66,8 +66,11 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
             displayRestaurantVicinity(restaurant.getVicinity(), holder.addressField);
         }
 
-        if (restaurant.getTypes() != null) {
+        /*if (restaurant.getTypes() != null) {
             holder.kindField.setText(restaurant.getTypes().get(0));
+        }*/
+        if (restaurant.getType() != null) {
+            holder.kindField.setText(restaurant.getType());
         }
 
         if (restaurant.getOpening_hours() != null) {
@@ -106,10 +109,9 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
         holder.distanceField.setText(distance);
 
 
-        if (restaurant.getPhotos() != null) {
-            List<Photos> photoInformation = restaurant.getPhotos();
-            photoData = photoInformation.get(0).getPhotoReference();
-            photoWidth = photoInformation.get(0).getWidth();
+        if(restaurant.getPhotoReference() != null){
+            photoData = restaurant.getPhotoReference();
+            photoWidth = restaurant.getPhotoWidth();
 
             Glide.with(context).load(parseDataPhotoToImage())
                     .into(holder.imageField);
@@ -123,14 +125,18 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
                 Intent i = new Intent(context, RestaurantProfilActivity.class);
                 i.putExtra("place_id", placeID);
                 i.putExtra("name", restaurant.getName());
-                if (restaurant.getPhotos() != null) {
+                if(restaurant.getPhotoReference() != null){
+                    i.putExtra("photo", photoData);
+                    i.putExtra("photoWidth", photoWidth);
+                }
+                /*if (restaurant.getPhotos() != null) {
                     String photoToSend = restaurant.getPhotos().get(0).getPhotoReference();
                     String photoWidthToSend = restaurant.getPhotos().get(0).getWidth();
                     i.putExtra("photo", photoToSend);
                     i.putExtra("photoWidth", photoWidthToSend);
-                }
+                }*/
                 i.putExtra("vicinity", restaurant.getVicinity());
-                i.putExtra("type", restaurant.getTypes().get(0));
+                i.putExtra("type", restaurant.getType());
                 i.putExtra("rate", rating);
                 ((Activity) context).startActivity(i);
 
@@ -213,12 +219,12 @@ public class RestaurantsListAdapter extends RecyclerView.Adapter<RestaurantsList
 
     private String parseDataPhotoToImage() {
 
-        String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
-        String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
-        String MAX_WIDTH = "maxwidth=";
-        String PHOTOREFERENCE = "&photoreference=";
-        return new StringBuilder().append(PLACES_API_BASE).append(MAX_WIDTH).append(photoWidth)
-                .append(PHOTOREFERENCE).append(photoData).append(API_KEY).toString();
+            String API_KEY = "&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
+            String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place/photo?";
+            String MAX_WIDTH = "maxwidth=";
+            String PHOTOREFERENCE = "&photoreference=";
+            return new StringBuilder().append(PLACES_API_BASE).append(MAX_WIDTH).append(photoWidth)
+                    .append(PHOTOREFERENCE).append(photoData).append(API_KEY).toString();
 
         //https://maps.googleapis.com/maps/api/place/photo?maxwidth=4032&photoreference=ATtYBwKU4gK6Y-aRIDxoRKq8wRs3se36xK49g0PS-O2iLg-NS_osj85NapJsY-aNHOk2MyZYisu2YN013wX5VlfvvbkyIfiYimscYJImUq_jfRCPjOOl3fNIuJyrFDnWoP64tbFfZF1Aja5WaWyISM6BOW0lvsmjySrvMiRUjC03_NCKxILK&key=AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704
     }

@@ -7,8 +7,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.go4lunch.model.Details;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.model.requests.Geometry;
+import com.example.go4lunch.model.requests.OpeningHours;
+import com.example.go4lunch.model.requests.Photos;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -50,9 +54,9 @@ public class RestaurantHelper {
 
     // --- CREATE ---
 
-    public static void createRestaurant(String placeID, String photoReference, String photoWidth, String name,
-                                        String vicinity, String type, String rating) {
-        Restaurant restaurantToCreate = new Restaurant(placeID, photoReference, photoWidth, name, vicinity, type, rating);
+    public static void createRestaurant(String placeID, String photoData, String photoWidth, String name,
+                                        String vicinity, String type, String rating, Geometry geometry, Details detail, OpeningHours openingHours) {
+        Restaurant restaurantToCreate = new Restaurant(placeID, photoData, photoWidth, name, vicinity, type, rating, geometry, detail, openingHours);
         RestaurantHelper.getRestaurantsCollection().document(placeID).set(restaurantToCreate);
     }
 
@@ -97,6 +101,30 @@ public class RestaurantHelper {
                 callback.onSuccess(users);
             }
         });
+    }
+
+    public interface GetAllRestaurantssCallback {
+        void onSuccess(List<Restaurant> list);
+
+        void onError(Exception exception);
+    }
+
+    public static void getAllRestaurants(GetAllRestaurantssCallback callback){
+        RestaurantHelper.getRestaurantsCollection().addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+                List<Restaurant> restaurants = new ArrayList<>();
+                for (QueryDocumentSnapshot doc : value) {
+                    Restaurant restaurant = doc.toObject(Restaurant.class);
+                    restaurants.add(restaurant);
+                }
+                callback.onSuccess(restaurants);
+            }
+            });
     }
 
     public interface GetUserTargetedCallback{

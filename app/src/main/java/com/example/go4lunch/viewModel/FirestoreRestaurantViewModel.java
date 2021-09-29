@@ -5,8 +5,12 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.go4lunch.api.RestaurantHelper;
+import com.example.go4lunch.model.Details;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.model.requests.Geometry;
+import com.example.go4lunch.model.requests.OpeningHours;
+import com.example.go4lunch.model.requests.Photos;
 
 import java.util.List;
 
@@ -15,15 +19,17 @@ public class FirestoreRestaurantViewModel extends ViewModel {
     private MutableLiveData<Restaurant> restaurantLiveData;
     private MutableLiveData<UserFirebase> userLiveData;
     private MutableLiveData<List<UserFirebase>> participantsListLiveData;
+    private MutableLiveData<List<Restaurant>> restaurantsListLiveData;
     private MutableLiveData<UserFirebase> userLikedLiveData;
 
     private Restaurant mRestaurant;
     private UserFirebase mUser, mUserLiked;
     private List<UserFirebase> mParticipants;
+    private List<Restaurant> mRestaurantsList;
 
-    public void createRestaurant(String placeID, String photoReference, String photoWidth, String name,
-                                 String vicinity, String type, String rating) {
-        RestaurantHelper.createRestaurant(placeID, photoReference, photoWidth, name, vicinity, type, rating);
+    public void createRestaurant(String placeID, String photoData, String photoWidth, String name,
+                                 String vicinity, String type, String rating, Geometry geometry, Details detail, OpeningHours openingHours) {
+        RestaurantHelper.createRestaurant(placeID, photoData, photoWidth, name, vicinity, type, rating, geometry, detail, openingHours);
     }
 
     public void createUserToRestaurant(String placeID, String uid, String username, String urlPicture) {
@@ -90,6 +96,25 @@ public class FirestoreRestaurantViewModel extends ViewModel {
             });
         }
         return participantsListLiveData;
+    }
+
+    public LiveData<List<Restaurant>> getAllRestaurants(){
+        if(restaurantsListLiveData == null){
+            restaurantsListLiveData = new MutableLiveData<List<Restaurant>>();
+            RestaurantHelper.getAllRestaurants(new RestaurantHelper.GetAllRestaurantssCallback() {
+                @Override
+                public void onSuccess(List<Restaurant> list) {
+                    mRestaurantsList = list;
+                    restaurantsListLiveData.postValue(mRestaurantsList);
+                }
+
+                @Override
+                public void onError(Exception exception) {
+                    restaurantsListLiveData.postValue(null);
+                }
+            });
+        }
+        return restaurantsListLiveData;
     }
 
     public LiveData<UserFirebase> getUserRestaurantLiked(String placeID, String uid){

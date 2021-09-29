@@ -64,9 +64,19 @@ public class RestaurantsListFragment extends Fragment {
         String locationText = latitude + "," + longitude;
         Log.d("localisation", locationText);
 
+        mFirestoreRestaurantVM.getAllRestaurants().observe(requireActivity(), new Observer<List<Restaurant>>() {
+            @Override
+            public void onChanged(List<Restaurant> restaurants) {
+                RestaurantsListFragment.this.restaurantsList.clear();
+                RestaurantsListFragment.this.restaurantsList.addAll(restaurants);
+                //recoveParticipants();
+                updateRestaurants();
+                loading.cancel();
+            }
+        });
 
         //todo observe my database and not google database
-        Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
+        /*Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
             @Override
             public void onChanged(List<Restaurant> restaurantsList) {
                 RestaurantsListFragment.this.restaurantsList.clear();
@@ -75,7 +85,7 @@ public class RestaurantsListFragment extends Fragment {
                 updateRestaurants();
                 loading.cancel();
             }
-        });
+        });*/
         configureRecyclerView();
 
     }
@@ -102,7 +112,7 @@ public class RestaurantsListFragment extends Fragment {
         });
     }
 
-    private void recoveParticipants(){
+    /*private void recoveParticipants(){
         if(restaurantsList.size() > 0){
             for(Restaurant restaurant : restaurantsList){
 
@@ -121,7 +131,7 @@ public class RestaurantsListFragment extends Fragment {
             }
 
         }
-    }
+    }*/
 
 
 

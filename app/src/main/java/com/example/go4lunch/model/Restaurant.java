@@ -37,7 +37,7 @@ public class Restaurant {
     private String place_id;
     private int participantsNumber;
     private Details details;
-    private String photoReference, photoWidth, type;
+    private String photoReference, photoWidth, type, latitude, longitude;
 
     public Restaurant(){
 
@@ -55,15 +55,18 @@ public class Restaurant {
         this.types = types;
     }
 
-    public Restaurant(String placeID, String photoReference, String photoWidth, String name,
-                      String vicinity, String type, String rating){
+    public Restaurant(String placeID, String photoData, String photoWidth, String name,
+                      String vicinity, String type, String rating, Geometry geometry, Details detail, OpeningHours openingHours){
         this.place_id = placeID;
-        this.photoReference = photoReference;
+        this.photoReference = photoData;
         this.photoWidth = photoWidth;
         this.name = name;
         this.vicinity = vicinity;
         this.type = type;
         this.rating = rating;
+        this.geometry = geometry;
+        this.details = detail;
+        this.opening_hours = openingHours;
     }
 
     public Restaurant(String placeID, int participantsNumber){
@@ -121,6 +124,14 @@ public class Restaurant {
 
     public String getType() {
         return type;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
     }
 
     public void setDetails(Details details) {

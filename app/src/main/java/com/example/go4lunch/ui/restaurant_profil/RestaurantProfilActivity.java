@@ -90,7 +90,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                     }
                 });
 
-        //addRestaurantToDatabase(placeID);
 
         choosedButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,17 +146,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel = Injection.provideFirestoreRestaurantViewModel(this);
     }
 
-    /*private void addRestaurantToDatabase(String placeID) {
-        fRestaurantViewModel.getRestaurant(placeID).observe(RestaurantProfilActivity.this, new Observer<Restaurant>() {
-            @Override
-            public void onChanged(Restaurant restaurant) {
-                mRestaurant = restaurant;
-                if (mRestaurant == null) {
-                    fRestaurantViewModel.createRestaurant(placeID, photoReference, photoWidth, name, vicinity, type, rating);
-                }
-            }
-        });
-    }*/
 
     @Override
     protected void onResume() {
@@ -174,6 +162,13 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                         updateParticipants();
                     }
                 });
+
+        Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                mCurrentUser = userFirebase;
+            }
+        });
     }
 
     private void configureRecyclerView() {
@@ -191,23 +186,17 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
     private void updateList() {
 
-        Injection.provideFirestoreUserViewModel(this).getUser(userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
-            @Override
-            public void onChanged(UserFirebase userFirebase) {
-                mCurrentUser = userFirebase;
-            }
-        });
-
         fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
-                //todo test it
+                //todo add the restaurant to collection of users
                 if(mCurrentUser != null){
                     boolean addParticipant;
                     if(mCurrentUser.getRestaurantChoosed() == null){
                         addParticipant = true;
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
+                        //fUserViewModel.createRestaurant
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
                         fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
                         choosedButton.setImageResource(R.drawable.ic_validated);

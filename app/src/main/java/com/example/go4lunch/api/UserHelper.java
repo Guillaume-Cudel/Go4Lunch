@@ -7,7 +7,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.go4lunch.model.Details;
+import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.firestore.UserFirebase;
+import com.example.go4lunch.model.requests.Geometry;
+import com.example.go4lunch.model.requests.OpeningHours;
 import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,6 +34,8 @@ public class UserHelper {
     private static final String COLLECTION_NAME = "users";
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
+    private static final String COLLECTION_RESTAURANT = "restaurant";
+    private static final String RESTAURANT = "restaurantID";
 
 
     // Get the Collection Reference
@@ -37,11 +43,25 @@ public class UserHelper {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
+    public static CollectionReference getRestaurantCollection(String uid){
+        return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RESTAURANT);
+    }
+
     // --- CREATE ---
 
     public static void createUser(String uid, String username, String urlPicture) {
         UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
         UserHelper.getUsersCollection().document(uid).set(userToCreate);
+    }
+
+
+    public static void createRestaurant(String uid, String placeID, String photoData, String photoWidth, String name,
+                                        String vicinity, String type, String rating, Geometry geometry, Details detail,
+                                        OpeningHours openingHours){
+        Restaurant restaurantToCreate = new Restaurant(placeID, photoData, photoWidth, name,
+                vicinity, type, rating, geometry, detail, openingHours);
+        UserHelper.getRestaurantCollection(uid).document(placeID).set(restaurantToCreate);
+
     }
 
     // --- GET ---
@@ -53,7 +73,6 @@ public class UserHelper {
     }
 
     public static void getAllUsers(GetUsersListCallback callback){
-        //todo change to observe in real time
         UserHelper.getUsersCollection().addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -89,12 +108,38 @@ public class UserHelper {
                 }
                 UserFirebase user = new UserFirebase();
                 if (value != null && value.exists()){
-                    //DocumentSnapshot document = (DocumentSnapshot) value.getData();
                     user = value.toObject(UserFirebase.class);
                 }else{
                     callback.onError(new Exception());
                 }
                 callback.onSuccess(user);
+            }
+        });
+    }
+
+    public interface GetRestaurantCallback{
+        void onSuccess(Restaurant restaurant);
+
+        void onError(Exception exception);
+    }
+
+    public static void getRestaurant(String uid, String placeID, GetRestaurantCallback callback){
+        DocumentReference docRef = UserHelper.getRestaurantCollection(uid).document(placeID);
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+                Restaurant restaurant = new Restaurant();
+                if (value != null && value.exists()){
+                    restaurant = value.toObject(Restaurant.class);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(restaurant);
             }
         });
     }
@@ -120,5 +165,7 @@ public class UserHelper {
     public static void deleteRestaurantname(String uid) {
         UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, null);
     }
+
+    //todo add delete Restaurant
 
 }

@@ -25,6 +25,9 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.go4lunch.R;
+import com.example.go4lunch.model.Details;
+import com.example.go4lunch.model.requests.Geometry;
+import com.example.go4lunch.model.requests.OpeningHours;
 import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
@@ -159,8 +162,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                             LatLng restaurantLocation = new LatLng(rLatitude, rLongitude);
                             String infoRate;
                             String rate = null;
+                            String type = restaurant.getTypes().get(0);
                             String photoData = null;
                             String photoWidth = null;
+                            List<Photos> photoInformation = null;
                             if (restaurant.getRating() != null){
                                 infoRate = "Rate: " + restaurant.getRating();
                                 rate = restaurant.getRating();
@@ -168,14 +173,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 infoRate = "No rating";
 
                             if(restaurant.getPhotos() != null) {
-                                List<Photos> photoInformation = restaurant.getPhotos();
+                                photoInformation = restaurant.getPhotos();
                                 photoData = photoInformation.get(0).getPhotoReference();
                                 photoWidth = photoInformation.get(0).getWidth();
                             }
 
+                            // latitude, longitude, details
                             //todo add details informations to firestore database
                             addRestaurantToDatabase(restaurant.getPlace_id(), photoData, photoWidth, title, restaurant.getVicinity(),
-                                    restaurant.getTypes().get(0), rate);
+                                    type, rate, restaurant.getGeometry(), restaurant.getDetails(), restaurant.getOpening_hours());
 
                             Bitmap bitmap = getBitmapFromVectorDrawable(getContext(),R.drawable.ic_restaurant_red);
                             BitmapDescriptor descriptor =BitmapDescriptorFactory.fromBitmap(bitmap);
@@ -260,16 +266,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         return bitmap;
     }
 
-    private void addRestaurantToDatabase(String placeID, String photoReference, String photoWidth, String name,
-                                         String vicinity, String type, String rating) {
+    private void addRestaurantToDatabase(String placeID, String photoData, String photoWidth, String name,
+                                         String vicinity, String type, String rating, Geometry geometry, Details detail, OpeningHours openingHours) {
 
         mFirebaseRestaurantVM.getRestaurant(placeID).observe(requireActivity(), new Observer<Restaurant>() {
             @Override
             public void onChanged(Restaurant restaurant) {
                 mRestaurant = restaurant;
                 if (mRestaurant == null) {
-                    mFirebaseRestaurantVM.createRestaurant(placeID, photoReference, photoWidth, name,
-                            vicinity, type, rating);
+                    mFirebaseRestaurantVM.createRestaurant(placeID, photoData, photoWidth, name,
+                            vicinity, type, rating, geometry, detail, openingHours);
                 }
             }
         });

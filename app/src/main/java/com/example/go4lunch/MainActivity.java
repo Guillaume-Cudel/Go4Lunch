@@ -8,9 +8,11 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.Observer;
 
 import com.example.go4lunch.databinding.ActivityMainBinding;
 import com.example.go4lunch.di.Injection;
+import com.example.go4lunch.model.firestore.UserFirebase;
 import com.example.go4lunch.ui.BaseActivity;
 import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.facebook.AccessToken;
@@ -44,6 +46,7 @@ public class MainActivity extends BaseActivity {
     GoogleSignInClient gsi;
     private FirebaseAuth mAuth;
     private FirestoreUserViewModel firestoreUserViewModel;
+
 
     @Override
     public int getFragmentLayout() {
@@ -234,14 +237,18 @@ public class MainActivity extends BaseActivity {
 
     private void createUserInFirestore(){
 
-        if (this.getCurrentUser() != null){
-
-            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-            String username = this.getCurrentUser().getDisplayName();
-            String uid = this.getCurrentUser().getUid();
-
-            firestoreUserViewModel.createUser(uid, username, urlPicture);
-            //UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+        if (this.getCurrentUser() != null) {
+            firestoreUserViewModel.getUser(getCurrentUser().getUid()).observe(this, new Observer<UserFirebase>() {
+                @Override
+                public void onChanged(UserFirebase userFirebase) {
+                    if(userFirebase == null){
+                        String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
+                        String username = getCurrentUser().getDisplayName();
+                        String uid = getCurrentUser().getUid();
+                        firestoreUserViewModel.createUser(uid, username, urlPicture);
+                    }
+                }
+            });
         }
     }
 }
