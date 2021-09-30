@@ -6,7 +6,6 @@ public class UserFirebase {
 
     private String uid;
     private String username;
-    //todo remove boolean
     @Nullable
     private String urlPicture;
     private String restaurantChoosed;

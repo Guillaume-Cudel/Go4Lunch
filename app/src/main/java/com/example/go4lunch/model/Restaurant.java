@@ -37,7 +37,7 @@ public class Restaurant {
     private String place_id;
     private int participantsNumber;
     private Details details;
-    private String photoReference, photoWidth, type, latitude, longitude;
+    private String photoReference, photoWidth, type;
 
     public Restaurant(){
 
@@ -69,9 +69,15 @@ public class Restaurant {
         this.opening_hours = openingHours;
     }
 
-    public Restaurant(String placeID, int participantsNumber){
+    public Restaurant(String placeID, String photoData, String photoWidth, String name,
+                      String vicinity, String type, String rating){
         this.place_id = placeID;
-        this.participantsNumber = participantsNumber;
+        this.photoReference = photoData;
+        this.photoWidth = photoWidth;
+        this.name = name;
+        this.vicinity = vicinity;
+        this.type = type;
+        this.rating = rating;
     }
 
     public String getName() {
@@ -124,14 +130,6 @@ public class Restaurant {
 
     public String getType() {
         return type;
-    }
-
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public String getLongitude() {
-        return longitude;
     }
 
     public void setDetails(Details details) {

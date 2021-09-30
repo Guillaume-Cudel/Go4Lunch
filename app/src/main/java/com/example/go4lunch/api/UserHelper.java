@@ -56,10 +56,9 @@ public class UserHelper {
 
 
     public static void createRestaurant(String uid, String placeID, String photoData, String photoWidth, String name,
-                                        String vicinity, String type, String rating, Geometry geometry, Details detail,
-                                        OpeningHours openingHours){
+                                        String vicinity, String type, String rating){
         Restaurant restaurantToCreate = new Restaurant(placeID, photoData, photoWidth, name,
-                vicinity, type, rating, geometry, detail, openingHours);
+                vicinity, type, rating);
         UserHelper.getRestaurantCollection(uid).document(placeID).set(restaurantToCreate);
 
     }
@@ -166,6 +165,8 @@ public class UserHelper {
         UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, null);
     }
 
-    //todo add delete Restaurant
+    public static void deleteRestaurant(String uid, String placeID){
+        UserHelper.getRestaurantCollection(uid).document(placeID).delete();
+    }
 
 }

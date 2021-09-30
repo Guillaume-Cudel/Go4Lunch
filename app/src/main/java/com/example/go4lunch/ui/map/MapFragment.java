@@ -178,8 +178,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                                 photoWidth = photoInformation.get(0).getWidth();
                             }
 
-                            // latitude, longitude, details
-                            //todo add details informations to firestore database
                             addRestaurantToDatabase(restaurant.getPlace_id(), photoData, photoWidth, title, restaurant.getVicinity(),
                                     type, rate, restaurant.getGeometry(), restaurant.getDetails(), restaurant.getOpening_hours());
 

@@ -111,7 +111,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
     }
 
     private void updateLike() {
-        //todo to test
         fRestaurantViewModel.getUserRestaurantLiked(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
@@ -154,9 +153,6 @@ public class RestaurantProfilActivity extends AppCompatActivity {
                 .observe(this, new Observer<List<UserFirebase>>() {
                     @Override
                     public void onChanged(List<UserFirebase> userFirebases) {
-                        if (userFirebases.size() > 0){
-                            choosedButton.setImageResource(R.drawable.ic_validated);
-                        }
                         RestaurantProfilActivity.this.participantslist.clear();
                         RestaurantProfilActivity.this.participantslist.addAll(userFirebases);
                         updateParticipants();
@@ -167,6 +163,11 @@ public class RestaurantProfilActivity extends AppCompatActivity {
             @Override
             public void onChanged(UserFirebase userFirebase) {
                 mCurrentUser = userFirebase;
+                if(mCurrentUser.getRestaurantChoosed().equals(placeID)){
+                    choosedButton.setImageResource(R.drawable.ic_validated);
+                }else{
+                    choosedButton.setImageResource(R.drawable.ic_go);
+                }
             }
         });
     }
@@ -189,34 +190,36 @@ public class RestaurantProfilActivity extends AppCompatActivity {
         fRestaurantViewModel.getUser(placeID, userUid).observe(RestaurantProfilActivity.this, new Observer<UserFirebase>() {
             @Override
             public void onChanged(UserFirebase userFirebase) {
-                //todo add the restaurant to collection of users
                 if(mCurrentUser != null){
                     boolean addParticipant;
                     if(mCurrentUser.getRestaurantChoosed() == null){
                         addParticipant = true;
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
-                        //fUserViewModel.createRestaurant
+                        fUserViewModel.createRestaurant(mCurrentUser.getUid(), placeID, photoReference, photoWidth, name, vicinity, type, rating);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
                         fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
-                        choosedButton.setImageResource(R.drawable.ic_validated);
+                        //choosedButton.setImageResource(R.drawable.ic_validated);
 
                     }else if (!mCurrentUser.getRestaurantChoosed().equals(placeID)) {
                         addParticipant = true;
                         fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantChoosed(), mCurrentUser.getUid());
+                        fUserViewModel.deleteRestaurant(mCurrentUser.getUid(), mCurrentUser.getRestaurantChoosed());
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);
                         fUserViewModel.updateRestaurantName(mCurrentUser.getUid(), name);
+                        fUserViewModel.createRestaurant(mCurrentUser.getUid(), placeID, photoReference, photoWidth, name, vicinity, type, rating);
                         fRestaurantViewModel.createUserToRestaurant(placeID, mCurrentUser.getUid(), mCurrentUser.getUsername(), mCurrentUser.getUrlPicture());
                         fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
-                        choosedButton.setImageResource(R.drawable.ic_validated);
+                        //choosedButton.setImageResource(R.drawable.ic_validated);
 
                     }else{
                         addParticipant = false;
                         fUserViewModel.deleteRestaurantChoosed(mCurrentUser.getUid());
                         fUserViewModel.deleteRestaurantname(mCurrentUser.getUid());
+                        fUserViewModel.deleteRestaurant(mCurrentUser.getUid(), placeID);
                         fRestaurantViewModel.deleteParticipant(placeID, mCurrentUser.getUid());
                         fRestaurantViewModel.updateParticipantNumber(placeID, addParticipant);
-                        choosedButton.setImageResource(R.drawable.ic_go);
+                        //choosedButton.setImageResource(R.drawable.ic_go);
                     }
                 }
             }

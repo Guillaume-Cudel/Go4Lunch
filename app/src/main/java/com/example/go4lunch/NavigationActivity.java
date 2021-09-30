@@ -120,6 +120,17 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
+            @Override
+            public void onChanged(UserFirebase userFirebase) {
+                mCurrentUser = userFirebase;
+            }
+        });
+    }
+
     // UI
 
     private void updateUIWhenCreating() {
@@ -350,45 +361,34 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     //------------------------
 
-    private void recoveCurrentUserData() {
-        firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
-            @Override
-            public void onChanged(UserFirebase userFirebase) {
-                mCurrentUser = userFirebase;
-            }
-        });
-    }
-
-    private void recoveRestaurantChoosed() {
-        //recoveCurrentUserData();
-
-        if (mCurrentUser != null) {
-            if (mCurrentUser.getRestaurantChoosed() != null) {
-                String placeID = mCurrentUser.getRestaurantChoosed();
-                firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
-                    @Override
-                    public void onChanged(Restaurant restaurant) {
-                        mRestaurant = restaurant;
-                    }
-                });
-            }else{
-                Toast.makeText(NavigationActivity.this, R.string.NavigationChooseRestaurant, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
 
     private void showRestaurantChoosed() {
-        //todo put the restaurant choosed in collection of current user and get it
-        //recoveRestaurantChoosed();
+        if(mCurrentUser != null) {
 
-        firestoreUserViewModel.getUser(userUid).observe(this, new Observer<UserFirebase>() {
-            @Override
-            public void onChanged(UserFirebase userFirebase) {
-                mCurrentUser = userFirebase;
-            }
-        });
+            firestoreUserViewModel.getRestaurant(mCurrentUser.getUid(), mCurrentUser.getRestaurantChoosed()).observe(this, new Observer<Restaurant>() {
+                @Override
+                public void onChanged(Restaurant restaurant) {
+                    mRestaurant = restaurant;
+                    if(mRestaurant == null){
+                        Toast.makeText(NavigationActivity.this, R.string.NavigationChooseRestaurant, Toast.LENGTH_LONG).show();
+                    }else{
+                        Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
+                        i.putExtra("place_id", mRestaurant.getPlace_id());
+                        i.putExtra("name", mRestaurant.getName());
+                        i.putExtra("photo", mRestaurant.getPhotoReference());
+                        i.putExtra("photoWidth", mRestaurant.getPhotoWidth());
+                        i.putExtra("vicinity", mRestaurant.getVicinity());
+                        i.putExtra("type", mRestaurant.getType());
+                        i.putExtra("rate", mRestaurant.getRating());
+                        startActivity(i);
+                    }
+                }
+            });
+        }
+        // ------------
 
-        if (mCurrentUser != null) {
+
+        /*if (mCurrentUser != null) {
             if (mCurrentUser.getRestaurantChoosed() != null) {
                 String placeID = mCurrentUser.getRestaurantChoosed();
                 firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
@@ -412,20 +412,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 i.putExtra("rate", mRestaurant.getRating());
                 startActivity(i);
             }
-        }
-
-        /*if (mRestaurant != null) {
-            Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
-            i.putExtra("place_id", mRestaurant.getPlace_id());
-            i.putExtra("name", mRestaurant.getName());
-            i.putExtra("photo", mRestaurant.getPhotoReference());
-            i.putExtra("photoWidth", mRestaurant.getPhotoWidth());
-            i.putExtra("vicinity", mRestaurant.getVicinity());
-            i.putExtra("type", mRestaurant.getType());
-            i.putExtra("rate", mRestaurant.getRating());
-            startActivity(i);
         }*/
-        //todo add toast if restaurant.getRestauID is null
+
     }
 
 }

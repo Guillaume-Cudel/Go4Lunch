@@ -36,7 +36,6 @@ public class FirestoreRestaurantViewModel extends ViewModel {
         RestaurantHelper.createRestaurantUser(placeID, uid, username, urlPicture);
     }
 
-    //todo test it
     public void createUserRestaurantLiked(String placeID, String uid, String username, String urlPicture){
         RestaurantHelper.createRestaurantLikedUser(placeID, uid, username, urlPicture);
     }

@@ -75,17 +75,6 @@ public class RestaurantsListFragment extends Fragment {
             }
         });
 
-        //todo observe my database and not google database
-        /*Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText).observe(this.getActivity(), new Observer<List<Restaurant>>() {
-            @Override
-            public void onChanged(List<Restaurant> restaurantsList) {
-                RestaurantsListFragment.this.restaurantsList.clear();
-                RestaurantsListFragment.this.restaurantsList.addAll(restaurantsList);
-                recoveParticipants();
-                updateRestaurants();
-                loading.cancel();
-            }
-        });*/
         configureRecyclerView();
 
     }
@@ -111,29 +100,6 @@ public class RestaurantsListFragment extends Fragment {
             }
         });
     }
-
-    /*private void recoveParticipants(){
-        if(restaurantsList.size() > 0){
-            for(Restaurant restaurant : restaurantsList){
-
-                mFirestoreRestaurantVM.getParticipantsList(restaurant.getPlace_id()).observe(requireActivity(),
-                new Observer<List<UserFirebase>>() {
-                    @Override
-                    public void onChanged(List<UserFirebase> userFirebases) {
-                        //todo not work
-                        if (userFirebases.size() > 0) {
-                            int participantsNumber = userFirebases.size();
-                            mFirestoreRestaurantVM.updateParticipantsNumber(restaurant.getPlace_id(), participantsNumber);
-                            updateRestaurants();
-                        }
-                    }
-                });
-            }
-
-        }
-    }*/
-
-
 
     private void configureRecyclerView() {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this.getActivity());
