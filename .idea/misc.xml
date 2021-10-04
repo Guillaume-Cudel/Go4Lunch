@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.2" />
         <entry key="app/src/main/res/drawable/ic_baseline_star_border.xml" value="0.175" />
         <entry key="app/src/main/res/drawable/ic_go.xml" value="0.175" />
+        <entry key="app/src/main/res/layout-v21/settings_radius_window.xml" value="0.28229166666666666" />
         <entry key="app/src/main/res/layout/activity_navigation.xml" value="0.16296296296296298" />
         <entry key="app/src/main/res/layout/activity_profil_restaurant.xml" value="0.335" />
         <entry key="app/src/main/res/layout/content_navigation.xml" value="0.16296296296296298" />
@@ -13,7 +15,8 @@
         <entry key="app/src/main/res/layout/info_window.xml" value="0.16296296296296298" />
         <entry key="app/src/main/res/layout/item_restaurant.xml" value="0.15092592592592594" />
         <entry key="app/src/main/res/layout/item_workmate.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/nav_header_navigation.xml" value="0.16296296296296298" />
+        <entry key="app/src/main/res/layout/nav_header_navigation.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/settings_radius_window.xml" value="0.25" />
         <entry key="app/src/main/res/menu/activity_navigation_menu_drawer.xml" value="0.23945578231292516" />
       </map>
     </option>

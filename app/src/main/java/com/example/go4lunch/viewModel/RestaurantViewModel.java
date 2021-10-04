@@ -37,6 +37,7 @@ public class RestaurantViewModel extends ViewModel {
     }
 
 
+    //todo change all method to add radius field
     private void loadRestaurants(String location) {
         restaurantRepository.getRestaurants(location, RADIUS, TYPE, API_KEY, new RestaurantRepository.GetRestaurantsCallback() {
             @Override

@@ -31,5 +31,9 @@
     <string name="messageRecovingRestaurants">Recoving restaurants</string>
     <string name="messageRecoveWorkmates">Recoving workmates</string>
     <string name="NavigationChooseRestaurant">Please, choose a restaurant.</string>
+    <string name="changing_scope">Changing scope</string>
+    <string name="progress">Progress: </string>
+    <string name="start_seekBar">Started tracking seekbar</string>
+    <string name="settings_dialog_title">Select the scope of restaurants recovery :</string>
 
 </resources>

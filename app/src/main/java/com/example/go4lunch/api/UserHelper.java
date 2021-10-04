@@ -27,7 +27,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserHelper {
 
@@ -35,7 +37,8 @@ public class UserHelper {
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
     private static final String COLLECTION_RESTAURANT = "restaurant";
-    private static final String RESTAURANT = "restaurantID";
+    private static final String COLLECTION_RADIUS = "radius";
+    private static final String CURRENT_RADIUS = "currentRadius";
 
 
     // Get the Collection Reference
@@ -47,6 +50,10 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RESTAURANT);
     }
 
+    public static CollectionReference getRadiusCollection(String uid){
+        return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RADIUS);
+    }
+
     // --- CREATE ---
 
     public static void createUser(String uid, String username, String urlPicture) {
@@ -54,13 +61,17 @@ public class UserHelper {
         UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
-
     public static void createRestaurant(String uid, String placeID, String photoData, String photoWidth, String name,
                                         String vicinity, String type, String rating){
         Restaurant restaurantToCreate = new Restaurant(placeID, photoData, photoWidth, name,
                 vicinity, type, rating);
         UserHelper.getRestaurantCollection(uid).document(placeID).set(restaurantToCreate);
+    }
 
+    public static void createRadius(String uid, String radius){
+        Map<String, Object> mRadius = new HashMap<>();
+        mRadius.put("currentRadius", "1000");
+        UserHelper.getRadiusCollection(uid).document(radius).set(mRadius);
     }
 
     // --- GET ---
@@ -143,6 +154,33 @@ public class UserHelper {
         });
     }
 
+    public interface GetRadiusCallback{
+        void onSuccess(String radius);
+
+        void onError(Exception exception);
+    }
+
+    public static void getRadius(String uid, String radiusField, GetRadiusCallback callback){
+        DocumentReference docRef = UserHelper.getRadiusCollection(uid).document(radiusField);
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+                //String currentRadius = value.getData();
+                String currentRadius = null;
+                if (value != null && value.exists()){
+                    currentRadius = value.toObject(String.class);
+                }else{
+                    callback.onError(new Exception());
+                }
+                callback.onSuccess(currentRadius);
+            }
+        });
+    }
+
 
     // --- UPDATE ---
 
@@ -153,6 +191,10 @@ public class UserHelper {
 
     public static void updateRestaurantName(String uid, String restaurantName){
         UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, restaurantName);
+    }
+
+    public static void updateRadius(String uid, String radius, String currentRadius){
+        UserHelper.getRadiusCollection(uid).document(radius).update(CURRENT_RADIUS, currentRadius);
     }
 
 

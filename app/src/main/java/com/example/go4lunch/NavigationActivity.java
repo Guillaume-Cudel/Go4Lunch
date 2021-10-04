@@ -2,6 +2,7 @@ package com.example.go4lunch;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
@@ -9,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -17,7 +19,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +71,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private String userUid = authUser.getUid();
     private UserFirebase mCurrentUser;
     private Restaurant mRestaurant;
+    private static final String RADIUS_FIELD = "radius";
+    private int mRadius;
 
     public Fragment fragmentMap;
     public Fragment fragmentRestaurantsList;
@@ -74,9 +81,11 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private static final int FRAGMENT_MAP = 0;
     private static final int FRAGMENT_RESTAURANT = 1;
     private static final int FRAGMENT_WORKMATES = 2;
+    private static int DELTA_VALUE = 500;
 
     // Easy location
     private static final int REQUEST_LOCATION_PERMISSION = 10;
+
 
 
     @Override
@@ -202,6 +211,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 showRestaurantChoosed();
                 break;
             case R.id.nav_settings:
+                openSettings();
                 break;
             case R.id.nav_log_out:
                 FirebaseAuth.getInstance().signOut();
@@ -359,9 +369,6 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
     }
 
-    //------------------------
-
-
     private void showRestaurantChoosed() {
         if(mCurrentUser != null) {
 
@@ -385,35 +392,100 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 }
             });
         }
-        // ------------
-
-
-        /*if (mCurrentUser != null) {
-            if (mCurrentUser.getRestaurantChoosed() != null) {
-                String placeID = mCurrentUser.getRestaurantChoosed();
-                firestoreRestaurantViewModel.getRestaurant(placeID).observe(this, new Observer<Restaurant>() {
-                    @Override
-                    public void onChanged(Restaurant restaurant) {
-                        mRestaurant = restaurant;
-                    }
-                });
-            }else{
-                Toast.makeText(NavigationActivity.this, R.string.NavigationChooseRestaurant, Toast.LENGTH_LONG).show();
-            }
-
-            if (mRestaurant != null) {
-                Intent i = new Intent(NavigationActivity.this, RestaurantProfilActivity.class);
-                i.putExtra("place_id", mRestaurant.getPlace_id());
-                i.putExtra("name", mRestaurant.getName());
-                i.putExtra("photo", mRestaurant.getPhotoReference());
-                i.putExtra("photoWidth", mRestaurant.getPhotoWidth());
-                i.putExtra("vicinity", mRestaurant.getVicinity());
-                i.putExtra("type", mRestaurant.getType());
-                i.putExtra("rate", mRestaurant.getRating());
-                startActivity(i);
-            }
-        }*/
-
     }
+
+    private void openSettings(){
+        mRadius = 0;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.settings_dialog_title);
+
+        final View customWindow = getLayoutInflater().inflate(R.layout.settings_radius_window, null);
+        SeekBar radiusBar = customWindow.findViewById(R.id.seekBar);
+        EditText radiusText = customWindow.findViewById(R.id.seekBar_text);
+
+        Button increaseButton = customWindow.findViewById(R.id.increase_button);
+        Button decreaseButton = customWindow.findViewById(R.id.decrease_button);
+
+        radiusBar.setMax(5000);
+        radiusBar.setProgress(mRadius);
+
+        String progress = getString(R.string.progress);
+        String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+        radiusText.setText(progressText);
+        builder.setView(customWindow);
+
+        radiusBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
+                mRadius = progressValue;
+                String changingSeekBar = getString(R.string.changing_scope);
+                String progressTextChanged = progress + progressValue + "/" + radiusBar.getMax();
+                radiusText.setText(progressTextChanged);
+                Toast.makeText(getApplicationContext(), changingSeekBar, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                String startSeekBar = getString(R.string.start_seekBar);
+                Toast.makeText(getApplicationContext(), startSeekBar, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                String progressText = progress + mRadius + "/" + seekBar.getMax();
+                String stoppedSeekBar = "Stopped tracking seekbar";
+                radiusText.setText(progressText);
+                Toast.makeText(getApplicationContext(), stoppedSeekBar, Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        decreaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int progressNumber = radiusBar.getProgress();
+                if(progressNumber - DELTA_VALUE < 0)  {
+                    radiusBar.setProgress(0);
+                } else  {
+                    radiusBar.setProgress(progressNumber - DELTA_VALUE);
+                }
+                String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+                radiusText.setText(progressText);
+            }
+        });
+
+        increaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int progressNumber = radiusBar.getProgress();
+                if(progressNumber + DELTA_VALUE > radiusBar.getMax())  {
+                    radiusBar.setProgress(0);
+                }else {
+                    radiusBar.setProgress(progressNumber + DELTA_VALUE);
+                }
+                String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+                radiusText.setText(progressText);
+            }
+        });
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String finalRadius = String.valueOf(mRadius);
+                firestoreUserViewModel.updateRadius(userUid, RADIUS_FIELD, finalRadius);
+                //todo to test
+                dialog.cancel();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
+
 
 }

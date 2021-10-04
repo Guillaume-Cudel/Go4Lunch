@@ -244,7 +244,9 @@ public class MainActivity extends BaseActivity {
                         String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
                         String username = getCurrentUser().getDisplayName();
                         String uid = getCurrentUser().getUid();
+                        String radius = "radius";
                         firestoreUserViewModel.createUser(uid, username, urlPicture);
+                        firestoreUserViewModel.createRadius(uid, radius);
 
                     /*if(userFirebase != null){
                         urlPicture =  userFirebase.getUrlPicture().toString();
