@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Details;
@@ -40,6 +41,7 @@ public class RestaurantsListFragment extends Fragment {
     private RestaurantsListAdapter adapter = new RestaurantsListAdapter(restaurantsList, mLatlng, this.getActivity());
     private FirestoreRestaurantViewModel mFirestoreRestaurantVM;
     private ProgressDialog loading;
+    private NavigationActivity navActivity;
 
 
     public RestaurantsListFragment( ) {
@@ -53,7 +55,9 @@ public class RestaurantsListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        loading = ProgressDialog.show(getActivity(), "", getString(R.string.messageRecovingRestaurants), true);
+        navActivity = (NavigationActivity) getActivity();
+
+        loading = ProgressDialog.show(navActivity, "", getString(R.string.messageRecovingRestaurants), true);
         mFirestoreRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
 
         recoveLocation();
@@ -64,7 +68,7 @@ public class RestaurantsListFragment extends Fragment {
         String locationText = latitude + "," + longitude;
         Log.d("localisation", locationText);
 
-        mFirestoreRestaurantVM.getAllRestaurants().observe(requireActivity(), new Observer<List<Restaurant>>() {
+        mFirestoreRestaurantVM.getAllRestaurants().observe(navActivity, new Observer<List<Restaurant>>() {
             @Override
             public void onChanged(List<Restaurant> restaurants) {
                 RestaurantsListFragment.this.restaurantsList.clear();
@@ -91,7 +95,7 @@ public class RestaurantsListFragment extends Fragment {
 
     private void recoveLocation(){
 
-        LocationViewModel locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
+        LocationViewModel locationViewModel = new ViewModelProvider(navActivity).get(LocationViewModel.class);
         locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
             @Override
             public void onChanged(LatLng latLng) {

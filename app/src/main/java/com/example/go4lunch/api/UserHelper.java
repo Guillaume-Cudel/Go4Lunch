@@ -37,7 +37,7 @@ public class UserHelper {
     private static final String RESTAURANT_CHOOSED_FIELD = "restaurantChoosed";
     private static final String RESTAURANT_NAME_FIELD = "restaurantName";
     private static final String COLLECTION_RESTAURANT = "restaurant";
-    private static final String COLLECTION_RADIUS = "radius";
+    //private static final String COLLECTION_RADIUS = "radius";
     private static final String CURRENT_RADIUS = "currentRadius";
 
 
@@ -50,14 +50,14 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RESTAURANT);
     }
 
-    public static CollectionReference getRadiusCollection(String uid){
+    /*public static CollectionReference getRadiusCollection(String uid){
         return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RADIUS);
-    }
+    }*/
 
     // --- CREATE ---
 
-    public static void createUser(String uid, String username, String urlPicture) {
-        UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture);
+    public static void createUser(String uid, String username, String urlPicture, String radius) {
+        UserFirebase userToCreate = new UserFirebase(uid, username, urlPicture, radius);
         UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
@@ -68,11 +68,11 @@ public class UserHelper {
         UserHelper.getRestaurantCollection(uid).document(placeID).set(restaurantToCreate);
     }
 
-    public static void createRadius(String uid, String radius){
+    /*public static void createRadius(String uid, String radius){
         Map<String, Object> mRadius = new HashMap<>();
         mRadius.put("currentRadius", "1000");
         UserHelper.getRadiusCollection(uid).document(radius).set(mRadius);
-    }
+    }*/
 
     // --- GET ---
 
@@ -154,7 +154,7 @@ public class UserHelper {
         });
     }
 
-    public interface GetRadiusCallback{
+    /*public interface GetRadiusCallback{
         void onSuccess(String radius);
 
         void onError(Exception exception);
@@ -179,7 +179,7 @@ public class UserHelper {
                 callback.onSuccess(currentRadius);
             }
         });
-    }
+    }*/
 
 
     // --- UPDATE ---
@@ -193,8 +193,9 @@ public class UserHelper {
         UserHelper.getUsersCollection().document(uid).update(RESTAURANT_NAME_FIELD, restaurantName);
     }
 
-    public static void updateRadius(String uid, String radius, String currentRadius){
-        UserHelper.getRadiusCollection(uid).document(radius).update(CURRENT_RADIUS, currentRadius);
+    public static void updateRadius(String uid, String currentRadius){
+        UserHelper.getUsersCollection().document(uid).update(CURRENT_RADIUS, currentRadius);
+        //UserHelper.getRadiusCollection(uid).document(radius).update(CURRENT_RADIUS, currentRadius);
     }
 
 

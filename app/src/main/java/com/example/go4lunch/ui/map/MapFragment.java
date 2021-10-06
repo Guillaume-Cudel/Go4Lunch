@@ -10,7 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +23,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.go4lunch.NavigationActivity;
 import com.example.go4lunch.R;
 import com.example.go4lunch.model.Details;
+import com.example.go4lunch.model.firestore.UserFirebase;
 import com.example.go4lunch.model.requests.Geometry;
 import com.example.go4lunch.model.requests.OpeningHours;
 import com.example.go4lunch.ui.restaurant_profil.RestaurantProfilActivity;
@@ -33,7 +34,9 @@ import com.example.go4lunch.di.Injection;
 import com.example.go4lunch.model.Restaurant;
 import com.example.go4lunch.model.requests.Photos;
 import com.example.go4lunch.viewModel.FirestoreRestaurantViewModel;
+import com.example.go4lunch.viewModel.FirestoreUserViewModel;
 import com.example.go4lunch.viewModel.LocationViewModel;
+import com.example.go4lunch.viewModel.RestaurantViewModel;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -45,6 +48,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -58,8 +63,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private GoogleMap map;
     private List<Restaurant> restaurantsList = new ArrayList<>();
     private Restaurant mRestaurant;
-    private FirestoreRestaurantViewModel mFirebaseRestaurantVM;
+    private NavigationActivity navActivity;
+    private RestaurantViewModel mRestaurantVM;
+    private FirestoreRestaurantViewModel mFirestoreRestaurantVM;
+    private FirestoreUserViewModel mFirestoreUserVM;
     private ProgressDialog loading;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser authUser = mAuth.getCurrentUser();
+    private String userUid = authUser.getUid();
+    private String mRadius;
 
 
     public static MapFragment newInstance() {
@@ -80,9 +92,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         super.onViewCreated(view, savedInstanceState);
 
         loading = ProgressDialog.show(getActivity(), "", getString(R.string.messageRecovingRestaurants), true);
-
+        navActivity = (NavigationActivity) getActivity();
         initLocationviewModel();
-        mFirebaseRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
+
+        mRestaurantVM = Injection.provideRestaurantViewModel(getActivity());
+        mFirestoreRestaurantVM = Injection.provideFirestoreRestaurantViewModel(getActivity());
+        mFirestoreUserVM = Injection.provideFirestoreUserViewModel(getActivity());
+        recoveRadius();
 
         mapFragment = SupportMapFragment.newInstance();
         mapFragment.getMapAsync(this);
@@ -107,10 +123,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
         );
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(toulouseBounds.getCenter(), 12));
 
-
+        //todo test
         if (mLatlng != null){
             plotBlueDot();
-            recoveAndMarkRestaurants();
+            recoveAndMarkRestaurants(mLatlng.latitude, mLatlng.longitude, mRadius);
         }
 
         // filter my position
@@ -127,74 +143,89 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
 
     private void initLocationviewModel() {
 
-        LocationViewModel locationViewModel = new ViewModelProvider(requireActivity()).get(LocationViewModel.class);
-        locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
+        if(navActivity != null) {
+            LocationViewModel locationViewModel = new ViewModelProvider(navActivity).get(LocationViewModel.class);
+            locationViewModel.locationLiveData.observe(requireActivity(), new Observer<LatLng>() {
+                @Override
+                public void onChanged(LatLng latLng) {
+                    mLatlng = latLng;
+                    plotBlueDot();
+                    recoveAndMarkRestaurants(mLatlng.latitude, mLatlng.longitude, mRadius);
+                }
+            });
+        }
+    }
+
+    public void reloadMap(double latitude, double longitude, String scope){
+        plotBlueDot();
+        recoveAndMarkRestaurants(latitude, longitude, scope);
+    }
+
+    private void recoveRadius(){
+
+        mFirestoreUserVM.getUser(userUid).observe(requireActivity(), new Observer<UserFirebase>() {
             @Override
-            public void onChanged(LatLng latLng) {
-                mLatlng = latLng;
-                plotBlueDot();
-                recoveAndMarkRestaurants();
+            public void onChanged(UserFirebase user) {
+                mRadius = user.getCurrentRadius();
             }
         });
     }
 
-    private void recoveAndMarkRestaurants() {
-        double latitude = mLatlng.latitude;
-        double longitude = mLatlng.longitude;
+    private void recoveAndMarkRestaurants(double latitude, double longitude, String scope) {
         String locationText = latitude + "," + longitude;
-        Log.d("localisation", locationText);
 
         // Get restaurants
-        Injection.provideRestaurantViewModel(getActivity()).getRestaurants(locationText)
-                .observe(this.getActivity(), new Observer<List<Restaurant>>() {
-                    @Override
-                    public void onChanged(List<Restaurant> restaurants) {
-                        MapFragment.this.restaurantsList.clear();
-                        MapFragment.this.restaurantsList.addAll(restaurants);
+        if(scope != null) {
+            mRestaurantVM.getRestaurants(locationText, scope).observe(navActivity, new Observer<List<Restaurant>>() {
+                        @Override
+                        public void onChanged(List<Restaurant> restaurants) {
+                            MapFragment.this.restaurantsList.clear();
+                            MapFragment.this.restaurantsList.addAll(restaurants);
 
-                        for (int i = 0; i < restaurantsList.size(); i++) {
-                            Restaurant restaurant = restaurantsList.get(i);
-                            String restaurantLatitude = restaurant.getGeometry().getLocation().getLat();
-                            String restaurantLongitude = restaurant.getGeometry().getLocation().getLng();
-                            String title = restaurant.getName();
-                            double rLatitude = Double.parseDouble(restaurantLatitude);
-                            double rLongitude = Double.parseDouble(restaurantLongitude);
-                            LatLng restaurantLocation = new LatLng(rLatitude, rLongitude);
-                            String infoRate;
-                            String rate = null;
-                            String type = restaurant.getTypes().get(0);
-                            String photoData = null;
-                            String photoWidth = null;
-                            List<Photos> photoInformation = null;
-                            if (restaurant.getRating() != null){
-                                infoRate = "Rate: " + restaurant.getRating();
-                                rate = restaurant.getRating();
-                            }else
-                                infoRate = "No rating";
+                            for (int i = 0; i < restaurantsList.size(); i++) {
+                                Restaurant restaurant = restaurantsList.get(i);
+                                String restaurantLatitude = restaurant.getGeometry().getLocation().getLat();
+                                String restaurantLongitude = restaurant.getGeometry().getLocation().getLng();
+                                String title = restaurant.getName();
+                                double rLatitude = Double.parseDouble(restaurantLatitude);
+                                double rLongitude = Double.parseDouble(restaurantLongitude);
+                                LatLng restaurantLocation = new LatLng(rLatitude, rLongitude);
+                                String infoRate;
+                                String rate = null;
+                                String type = restaurant.getTypes().get(0);
+                                String photoData = null;
+                                String photoWidth = null;
+                                List<Photos> photoInformation = null;
+                                if (restaurant.getRating() != null) {
+                                    infoRate = "Rate: " + restaurant.getRating();
+                                    rate = restaurant.getRating();
+                                } else
+                                    infoRate = "No rating";
 
-                            if(restaurant.getPhotos() != null) {
-                                photoInformation = restaurant.getPhotos();
-                                photoData = photoInformation.get(0).getPhotoReference();
-                                photoWidth = photoInformation.get(0).getWidth();
+                                if (restaurant.getPhotos() != null) {
+                                    photoInformation = restaurant.getPhotos();
+                                    photoData = photoInformation.get(0).getPhotoReference();
+                                    photoWidth = photoInformation.get(0).getWidth();
+                                }
+
+                                addRestaurantToDatabase(restaurant.getPlace_id(), photoData, photoWidth, title, restaurant.getVicinity(),
+                                        type, rate, restaurant.getGeometry(), restaurant.getDetails(), restaurant.getOpening_hours());
+
+                                Bitmap bitmap = getBitmapFromVectorDrawable(getContext(), R.drawable.ic_restaurant_red);
+                                BitmapDescriptor descriptor = BitmapDescriptorFactory.fromBitmap(bitmap);
+
+                                Marker restaurantMarker = map.addMarker(new MarkerOptions()
+                                        .position(restaurantLocation)
+                                        .title(title)
+                                        .snippet(infoRate)
+                                        .icon(descriptor)
+                                );
+                                restaurantMarker.setTag(restaurant);
                             }
-
-                            addRestaurantToDatabase(restaurant.getPlace_id(), photoData, photoWidth, title, restaurant.getVicinity(),
-                                    type, rate, restaurant.getGeometry(), restaurant.getDetails(), restaurant.getOpening_hours());
-
-                            Bitmap bitmap = getBitmapFromVectorDrawable(getContext(),R.drawable.ic_restaurant_red);
-                            BitmapDescriptor descriptor =BitmapDescriptorFactory.fromBitmap(bitmap);
-
-                            Marker restaurantMarker = map.addMarker(new MarkerOptions()
-                                    .position(restaurantLocation)
-                                    .title(title)
-                                    .snippet(infoRate)
-                                    .icon(descriptor)
-                            );
-                            restaurantMarker.setTag(restaurant);
+                            loading.cancel();
                         }
-                        loading.cancel();
-                    }
-                });
+                    });
+        }
     }
 
 
@@ -209,6 +240,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
                 CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
                 map.moveCamera(CameraUpdateFactory.newLatLng(myPosition));
                 map.animateCamera(zoom);
+
             }
         }
     }
@@ -267,22 +299,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleM
     private void addRestaurantToDatabase(String placeID, String photoData, String photoWidth, String name,
                                          String vicinity, String type, String rating, Geometry geometry, Details detail, OpeningHours openingHours) {
 
-        mFirebaseRestaurantVM.getRestaurant(placeID).observe(requireActivity(), new Observer<Restaurant>() {
+        mFirestoreRestaurantVM.getRestaurant(placeID).observe(requireActivity(), new Observer<Restaurant>() {
             @Override
             public void onChanged(Restaurant restaurant) {
                 mRestaurant = restaurant;
                 if (mRestaurant == null) {
-                    mFirebaseRestaurantVM.createRestaurant(placeID, photoData, photoWidth, name,
+                    mFirestoreRestaurantVM.createRestaurant(placeID, photoData, photoWidth, name,
                             vicinity, type, rating, geometry, detail, openingHours);
                 }
             }
         });
     }
 
-    @Override
+    /*@Override
     public void onDetach() {
         super.onDetach();
         //todo regarder la doc de map pour nettoyer le changement ecran
-        //mapFragment.
-    }
+
+    }*/
+
+    /*@Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        try{
+            MapFragment fragment = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_fragment));
+            FragmentTransaction ft = getActivity().getFragmentManager().beginTransaction();
+            ft.remove(fragment);
+            ft.commit();
+        }catch(Exception e){
+        }
+    }*/
 }

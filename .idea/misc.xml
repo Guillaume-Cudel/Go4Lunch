@@ -18,6 +18,7 @@
         <entry key="app/src/main/res/layout/nav_header_navigation.xml" value="0.25" />
         <entry key="app/src/main/res/layout/settings_radius_window.xml" value="0.25" />
         <entry key="app/src/main/res/menu/activity_navigation_menu_drawer.xml" value="0.23945578231292516" />
+        <entry key="app/src/main/res/menu/bottom_nav_menu.xml" value="0.1527777777777778" />
       </map>
     </option>
   </component>

@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 
 import android.Manifest;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -71,7 +72,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     private String userUid = authUser.getUid();
     private UserFirebase mCurrentUser;
     private Restaurant mRestaurant;
-    private static final String RADIUS_FIELD = "radius";
+    private Location mLocation;
+    //private static final String RADIUS_FIELD = "radius";
     private int mRadius;
 
     public Fragment fragmentMap;
@@ -114,6 +116,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         fragmentTransaction.replace(R.id.nav_host_fragment, fragmentMap);
         fragmentTransaction.commit();
 
+
         // Toolbar configuration
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -136,6 +139,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
             @Override
             public void onChanged(UserFirebase userFirebase) {
                 mCurrentUser = userFirebase;
+                String radiusString = userFirebase.getCurrentRadius();
+                mRadius = Integer.parseInt(radiusString);
             }
         });
     }
@@ -347,6 +352,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                         startLocationUpdates(locationRequest, locationCallback);
                     }
                     if (location != null) {
+                        mLocation = location;
                         locationViewModel.setLocation(location.getLatitude(), location.getLongitude());
                         stopLocationUpdates(locationCallback);
                     }
@@ -395,7 +401,8 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
     }
 
     private void openSettings(){
-        mRadius = 0;
+        //mRadius = 0;
+        int nProgress = 0;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.settings_dialog_title);
@@ -410,17 +417,16 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         radiusBar.setMax(5000);
         radiusBar.setProgress(mRadius);
 
-        String progress = getString(R.string.progress);
-        String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+        String sProgress = getString(R.string.progress);
+        String progressText = sProgress + radiusBar.getProgress() + "/" + radiusBar.getMax();
         radiusText.setText(progressText);
         builder.setView(customWindow);
 
         radiusBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser) {
-                mRadius = progressValue;
                 String changingSeekBar = getString(R.string.changing_scope);
-                String progressTextChanged = progress + progressValue + "/" + radiusBar.getMax();
+                String progressTextChanged = sProgress + progressValue + "/" + radiusBar.getMax();
                 radiusText.setText(progressTextChanged);
                 Toast.makeText(getApplicationContext(), changingSeekBar, Toast.LENGTH_SHORT).show();
             }
@@ -433,7 +439,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                String progressText = progress + mRadius + "/" + seekBar.getMax();
+                String progressText = sProgress + mRadius + "/" + seekBar.getMax();
                 String stoppedSeekBar = "Stopped tracking seekbar";
                 radiusText.setText(progressText);
                 Toast.makeText(getApplicationContext(), stoppedSeekBar, Toast.LENGTH_SHORT).show();
@@ -450,7 +456,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 } else  {
                     radiusBar.setProgress(progressNumber - DELTA_VALUE);
                 }
-                String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+                String progressText = sProgress + radiusBar.getProgress() + "/" + radiusBar.getMax();
                 radiusText.setText(progressText);
             }
         });
@@ -464,7 +470,7 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
                 }else {
                     radiusBar.setProgress(progressNumber + DELTA_VALUE);
                 }
-                String progressText = progress + radiusBar.getProgress() + "/" + radiusBar.getMax();
+                String progressText = sProgress + radiusBar.getProgress() + "/" + radiusBar.getMax();
                 radiusText.setText(progressText);
             }
         });
@@ -472,10 +478,22 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String finalRadius = String.valueOf(mRadius);
-                firestoreUserViewModel.updateRadius(userUid, RADIUS_FIELD, finalRadius);
-                //todo to test
+                //test
+                MapFragment fragment = new MapFragment();
+
+                int currentRadius = radiusBar.getProgress();
+                String finalRadius = String.valueOf(currentRadius);
+                firestoreUserViewModel.updateRadius(userUid, finalRadius);
+                //fragment.reloadMap(mLocation.getLatitude(), mLocation.getLongitude(), finalRadius);
+
+
+
+                fragmentMap = MapFragment.newInstance();
+                startTransactionFragment(fragment);
                 dialog.cancel();
+
+                //getFragmentManager().beginTransaction().detach(fragmentMap).attach(this).commit();
+
             }
         });
 

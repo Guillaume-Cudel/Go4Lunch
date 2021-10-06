@@ -10,6 +10,7 @@ public class UserFirebase {
     private String urlPicture;
     private String restaurantChoosed;
     private String restaurantName;
+    private String currentRadius;
 
 
     public UserFirebase() { }
@@ -21,6 +22,16 @@ public class UserFirebase {
         this.urlPicture = urlPicture;
         this.restaurantName = null;
         this.restaurantChoosed = null;
+        this.currentRadius = null;
+    }
+
+    public UserFirebase(String uid, String username, @Nullable String urlPicture, String radius){
+        this.uid = uid;
+        this.username = username;
+        this.urlPicture = urlPicture;
+        this.restaurantName = null;
+        this.restaurantChoosed = null;
+        this.currentRadius = radius;
     }
 
     // --- GETTERS ---
@@ -31,4 +42,7 @@ public class UserFirebase {
     public String getRestaurantChoosed() { return restaurantChoosed; }
     public String getRestaurantName() { return restaurantName; }
 
+    public String getCurrentRadius() {
+        return currentRadius;
+    }
 }

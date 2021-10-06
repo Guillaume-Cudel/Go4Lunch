@@ -216,6 +216,7 @@ public class MainActivity extends BaseActivity {
                 });
     }
 
+    // show is is possible to remove this
     private void updateUI(){
         if (isCurrentUserLogged()){
             startNavigationActivity();
@@ -237,25 +238,35 @@ public class MainActivity extends BaseActivity {
 
     private void createUserInFirestore(){
 
-        if (this.getCurrentUser() != null) {
-            firestoreUserViewModel.getUser(getCurrentUser().getUid()).observe(this, new Observer<UserFirebase>() {
+        //todo finish it to don't get always null variable
+        if (isCurrentUserLogged()) {
+            String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
+            String username = getCurrentUser().getDisplayName();
+            String uid = getCurrentUser().getUid();
+            String radius = "1000";
+            firestoreUserViewModel.createUser(uid, username, urlPicture, radius);
+        }
+           /* firestoreUserViewModel.getUser(getCurrentUser().getUid()).observe(this, new Observer<UserFirebase>() {
                 @Override
                 public void onChanged(UserFirebase userFirebase) {
+                    //if(userFirebase == null) {
                         String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
                         String username = getCurrentUser().getDisplayName();
                         String uid = getCurrentUser().getUid();
-                        String radius = "radius";
-                        firestoreUserViewModel.createUser(uid, username, urlPicture);
-                        firestoreUserViewModel.createRadius(uid, radius);
+                        String radius = "1000";
+                        firestoreUserViewModel.createUser(uid, username, urlPicture, radius);
+                    //}
+                        //startNavigationActivity();
+                        //firestoreUserViewModel.createRadius(uid, radius);
 
-                    /*if(userFirebase != null){
+                    *//*if(userFirebase != null){
                         urlPicture =  userFirebase.getUrlPicture().toString();
                         username = userFirebase.getUsername();
                         uid = userFirebase.getUid();
                         firestoreUserViewModel.createUser(uid, username, urlPicture);
-                    }*/
+                    }*//*
                 }
-            });
-        }
+            });*/
+       // }
     }
 }

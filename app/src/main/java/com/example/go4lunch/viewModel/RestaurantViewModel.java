@@ -14,7 +14,7 @@ public class RestaurantViewModel extends ViewModel {
 
     private static final String API_KEY = "AIzaSyBpPAJjNZ2X4q0xz3p_zK_uW3MdZCpD704";
     //todo change radius from profil settings?
-    private static final String RADIUS = "1000";
+    //private static final String RADIUS = "1000";
     private static final String TYPE = "restaurant";
     private static final String FIELDS = "formatted_phone_number,opening_hours,website";
     private MutableLiveData<List<Restaurant>> restaurantListLiveData;
@@ -28,18 +28,17 @@ public class RestaurantViewModel extends ViewModel {
     }
 
 
-    public LiveData<List<Restaurant>> getRestaurants(String location) {
+    public LiveData<List<Restaurant>> getRestaurants(String location, String radius) {
         if (restaurantListLiveData == null) {
             restaurantListLiveData = new MutableLiveData<List<Restaurant>>();
-            loadRestaurants(location);
+            loadRestaurants(location, radius);
         }
         return restaurantListLiveData;
     }
 
 
-    //todo change all method to add radius field
-    private void loadRestaurants(String location) {
-        restaurantRepository.getRestaurants(location, RADIUS, TYPE, API_KEY, new RestaurantRepository.GetRestaurantsCallback() {
+    private void loadRestaurants(String location, String radius) {
+        restaurantRepository.getRestaurants(location, radius, TYPE, API_KEY, new RestaurantRepository.GetRestaurantsCallback() {
             @Override
             public void onSuccess(List<Restaurant> restaurants) {
                 restaurantListLiveData.postValue(restaurants);

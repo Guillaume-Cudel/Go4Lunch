@@ -21,11 +21,11 @@ public class FirestoreUserViewModel extends ViewModel {
     private List<UserFirebase> workmates;
     private UserFirebase mUser;
     private Restaurant mRestaurant;
-    private String currentRadius;
+    //private String currentRadius;
 
 
-    public void createUser(String uid, String username, String urlPicture) {
-        UserHelper.createUser(uid, username, urlPicture);
+    public void createUser(String uid, String username, String urlPicture, String radius) {
+        UserHelper.createUser(uid, username, urlPicture, radius);
     }
 
     public void createRestaurant(String uid, String placeID, String photoData, String photoWidth, String name,
@@ -34,9 +34,9 @@ public class FirestoreUserViewModel extends ViewModel {
                 vicinity, type, rating);
     }
     
-    public void createRadius(String uid, String radius){
+    /*public void createRadius(String uid, String radius){
         UserHelper.createRadius(uid, radius);
-    }
+    }*/
 
     public LiveData<List<UserFirebase>> getWorkmatesList() {
         if (usersListLiveData == null) {
@@ -95,7 +95,7 @@ public class FirestoreUserViewModel extends ViewModel {
         return getRestaurantLiveData;
     }
     
-    public LiveData<String> getRadius(String uid, String radius){
+    /*public LiveData<String> getRadius(String uid, String radius){
         MutableLiveData<String> getRadiusLiveData = new MutableLiveData<String>();
         UserHelper.getRadius(uid, radius, new UserHelper.GetRadiusCallback() {
             @Override
@@ -110,7 +110,7 @@ public class FirestoreUserViewModel extends ViewModel {
             }
         });
         return getRadiusLiveData;
-    }
+    }*/
 
     public void updateRestaurantChoosed(String uid, String restaurantChoosed) {
         UserHelper.updateRestaurantChoosed(uid, restaurantChoosed);
@@ -120,8 +120,8 @@ public class FirestoreUserViewModel extends ViewModel {
         UserHelper.updateRestaurantName(uid, restaurantName);
     }
     
-    public void updateRadius(String uid, String radiusField, String currentRadius){
-        UserHelper.updateRadius(uid, radiusField, currentRadius);
+    public void updateRadius(String uid, String currentRadius){
+        UserHelper.updateRadius(uid, currentRadius);
     }
 
     public void deleteRestaurantChoosed(String uid) {
