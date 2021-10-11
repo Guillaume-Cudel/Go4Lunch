@@ -154,34 +154,6 @@ public class UserHelper {
         });
     }
 
-    /*public interface GetRadiusCallback{
-        void onSuccess(String radius);
-
-        void onError(Exception exception);
-    }
-
-    public static void getRadius(String uid, String radiusField, GetRadiusCallback callback){
-        DocumentReference docRef = UserHelper.getRadiusCollection(uid).document(radiusField);
-        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.w(TAG, "Listen failed.", error);
-                    callback.onError(new Exception());
-                }
-                //String currentRadius = value.getData();
-                String currentRadius = null;
-                if (value != null && value.exists()){
-                    currentRadius = value.toObject(String.class);
-                }else{
-                    callback.onError(new Exception());
-                }
-                callback.onSuccess(currentRadius);
-            }
-        });
-    }*/
-
-
     // --- UPDATE ---
 
 

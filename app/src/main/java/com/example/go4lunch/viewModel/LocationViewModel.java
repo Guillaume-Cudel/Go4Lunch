@@ -8,20 +8,28 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class LocationViewModel extends ViewModel {
 
-   private final MutableLiveData<LatLng> _locationLiveData = new MutableLiveData<>();
-   public LiveData<LatLng> locationLiveData = _locationLiveData;
+    private final MutableLiveData<LatLng> _locationLiveData = new MutableLiveData<>();
+    //private MutableLiveData<String> _radiusLiveData = new MutableLiveData<>();
+    public LiveData<LatLng> locationLiveData = _locationLiveData;
+    //public LiveData<String> radiusLiveData = _radiusLiveData;
 
-    private LatLng location;
+    private LatLng mLocation;
+    //private String mRadius;
 
 
-    public void setLocation(double latitude, double longitude){
-        this.location = new LatLng(latitude, longitude);
-        _locationLiveData.postValue(location);
+    public void setLocation(double latitude, double longitude) {
+        this.mLocation = new LatLng(latitude, longitude);
+        _locationLiveData.postValue(mLocation);
     }
 
-    public LatLng getLocation(){
-        return location;
+    public LatLng getLocation() {
+        return mLocation;
     }
 
 
+    /*
+    public void setRadius(String radius) {
+        this.mRadius = radius;
+        _radiusLiveData.postValue(mRadius);
+    }*/
 }

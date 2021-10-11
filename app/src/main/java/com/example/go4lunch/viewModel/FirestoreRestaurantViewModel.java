@@ -137,9 +137,7 @@ public class FirestoreRestaurantViewModel extends ViewModel {
     public void  updateParticipantNumber(String placeID, boolean addParticipant){
         RestaurantHelper.updateParticipantNumber(placeID, addParticipant);
     }
-    /*public void updateParticipantsNumber(String placeID, int participantsNumber){
-        RestaurantHelper.updateParticipantsNumber(placeID, participantsNumber);
-    }*/
+
 
     public void deleteParticipant(String placeID, String uid) {
         RestaurantHelper.deleteParticipant(placeID, uid);

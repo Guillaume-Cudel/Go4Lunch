@@ -478,21 +478,19 @@ public class NavigationActivity extends BaseActivity implements NavigationView.O
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //test
-                MapFragment fragment = new MapFragment();
+                //todo onClick OK, reload the map --- test it
+                //MapFragment fragment = new MapFragment();
 
                 int currentRadius = radiusBar.getProgress();
                 String finalRadius = String.valueOf(currentRadius);
                 firestoreUserViewModel.updateRadius(userUid, finalRadius);
+                //locationViewModel.setRadius(finalRadius);
                 //fragment.reloadMap(mLocation.getLatitude(), mLocation.getLongitude(), finalRadius);
 
-
-
-                fragmentMap = MapFragment.newInstance();
-                startTransactionFragment(fragment);
+                /*fragmentMap = MapFragment.newInstance();
+                startTransactionFragment(fragment);*/
                 dialog.cancel();
 
-                //getFragmentManager().beginTransaction().detach(fragmentMap).attach(this).commit();
 
             }
         });

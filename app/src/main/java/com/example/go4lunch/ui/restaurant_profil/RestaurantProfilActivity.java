@@ -205,6 +205,8 @@ public class RestaurantProfilActivity extends AppCompatActivity {
 
                     } else if (!mCurrentUser.getRestaurantChoosed().equals(placeID)) {
                         addParticipant = true;
+                        boolean participantElsewhere = false;
+                        fRestaurantViewModel.updateParticipantNumber(mCurrentUser.getRestaurantChoosed(), participantElsewhere);
                         fRestaurantViewModel.deleteParticipant(mCurrentUser.getRestaurantChoosed(), mCurrentUser.getUid());
                         fUserViewModel.deleteRestaurant(mCurrentUser.getUid(), mCurrentUser.getRestaurantChoosed());
                         fUserViewModel.updateRestaurantChoosed(mCurrentUser.getUid(), placeID);

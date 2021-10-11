@@ -156,9 +156,27 @@ public class RestaurantHelper {
         void onError(Exception exception);
     }
 
+    //todo change this method to get restaurants info in real time --- test it
     public static void getTargetedRestaurant(String placeId, GetRestaurantsTargetedCallback callback){
         DocumentReference docRef = RestaurantHelper.getRestaurantsCollection().document(placeId);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error);
+                    callback.onError(new Exception());
+                }
+                Restaurant restaurant = new Restaurant();
+                if (value != null && value.exists()){
+                    //DocumentSnapshot document = task.getResult();
+                    restaurant = value.toObject(Restaurant.class);
+                }
+                callback.onSuccess(restaurant);
+            }
+        });
+
+
+        /*docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 Restaurant restaurant = new Restaurant();
@@ -170,7 +188,7 @@ public class RestaurantHelper {
                 }
                 callback.onSuccess(restaurant);
             }
-        });
+        });*/
     }
 
     public interface GetUserRestaurantLikedCallback{
@@ -198,10 +216,8 @@ public class RestaurantHelper {
 
     // --- UPDATE ---
 
-    /*public static void updateParticipantsNumber(String placeID, int participantsNumber){
-        RestaurantHelper.getRestaurantsCollection().document(placeID).update(PARTICIPANTS_NUMBER, participantsNumber);
-    }*/
 
+    //todo check this if on click, the number increase or decrease --- test it
     public static void updateParticipantNumber(String placeID, boolean addParticipant){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = RestaurantHelper.getRestaurantsCollection().document(placeID);

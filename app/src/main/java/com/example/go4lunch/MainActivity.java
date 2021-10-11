@@ -238,35 +238,48 @@ public class MainActivity extends BaseActivity {
 
     private void createUserInFirestore(){
 
-        //todo finish it to don't get always null variable
+        //todo finish it to don't get always null variable --- test it
         if (isCurrentUserLogged()) {
-            String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
+            firestoreUserViewModel.getUser(getCurrentUser().getUid()).observe(this,
+                    new Observer<UserFirebase>() {
+                        @Override
+                        public void onChanged(UserFirebase userFirebase) {
+                            if (userFirebase == null) {
+                                String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
+                                String username = getCurrentUser().getDisplayName();
+                                String uid = getCurrentUser().getUid();
+                                String radius = "1000";
+                                firestoreUserViewModel.createUser(uid, username, urlPicture, radius);
+                            }
+
+                        }
+                    });
+        }
+    }
+
+
+            /*String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
             String username = getCurrentUser().getDisplayName();
             String uid = getCurrentUser().getUid();
             String radius = "1000";
-            firestoreUserViewModel.createUser(uid, username, urlPicture, radius);
-        }
+            firestoreUserViewModel.createUser(uid, username, urlPicture, radius);*/
+
            /* firestoreUserViewModel.getUser(getCurrentUser().getUid()).observe(this, new Observer<UserFirebase>() {
                 @Override
                 public void onChanged(UserFirebase userFirebase) {
-                    //if(userFirebase == null) {
+                    if(userFirebase == null) {
                         String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
                         String username = getCurrentUser().getDisplayName();
                         String uid = getCurrentUser().getUid();
                         String radius = "1000";
                         firestoreUserViewModel.createUser(uid, username, urlPicture, radius);
                     //}
-                        //startNavigationActivity();
-                        //firestoreUserViewModel.createRadius(uid, radius);
 
                     *//*if(userFirebase != null){
                         urlPicture =  userFirebase.getUrlPicture().toString();
                         username = userFirebase.getUsername();
                         uid = userFirebase.getUid();
                         firestoreUserViewModel.createUser(uid, username, urlPicture);
-                    }*//*
-                }
-            });*/
-       // }
+                    }*/
     }
 }
